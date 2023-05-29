@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const {grantAccess} = require('../middleware/authMiddleware');
-const {registerUser,loginUser}=require("../controller/auth")
+const {grantAccess} = require('../../middlewares/userVerification');
+const {registerUser,loginUser}=require("../controllers/user")
 // Import your controllers
 const {
     getAllUser,
