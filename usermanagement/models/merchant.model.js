@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
-module.exports = (sequelize, Sequelize) => {
-  const Merchant = sequelize.define("merchants", {
+const sequelize=require("../../configs/db")
+
+const Merchant = sequelize.define("merchants", {
     merchant_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -8,16 +9,16 @@ module.exports = (sequelize, Sequelize) => {
     },
     email_address: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     emailStatus: {
-      type: String,
+      type: DataTypes.STRING,
       enum: ["Pending", "Active", "Inactive"],
-      default: "Pending",
+      defaultValue: "Pending",
     },
     phone_number: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     password: {
       type: DataTypes.STRING,
@@ -25,9 +26,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     role: {
       type: DataTypes.STRING,
-      default: "merchant",
+      defaultValue: "merchant",
       allowNull: false,
-    },
+    }
   });
-  return Merchant;
-};
+
+module.exports=Merchant;

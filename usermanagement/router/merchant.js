@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {grantAccess} = require('../../middlewares/userVerification');
-const {registerUser,loginUser}=require("../controllers/user")
+const {registerMerchant,loginMerchant}=require("../controllers/merchant")
 // Import your controllers
 const {
     getAllUser,
@@ -17,14 +17,14 @@ const {
     getNedajStation,
     getPrimaryAccount,
     setPrimaryAccount
-} = require('../controllers/user');
+} = require('../controllers/merchant');
 // User routes
-router.get('/', grantAccess(['admin','user']), getAllUser);
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.get('/:id', grantAccess(['user', 'admin']), getUserById);
-router.get('/createAccount', grantAccess(['user']),createAccount);
-router.get('/setPrimaryAccount', grantAccess(['user']),createAccount);
-router.get('/generateApiKey', grantAccess(['user']),generateApiKey);
-router.get('/bussinessRequest', grantAccess(['user']),sendBussinessRequest);
+// router.get('/', grantAccess(['admin','user']), getAllUser);
+router.post('/register', registerMerchant);
+router.post('/login', loginMerchant);
+// router.get('/:id', grantAccess(['user', 'admin']), getUserById);
+// router.get('/createAccount', grantAccess(['user']),createAccount);
+// router.get('/setPrimaryAccount', grantAccess(['user']),createAccount);
+// router.get('/generateApiKey', grantAccess(['user']),generateApiKey);
+// router.get('/bussinessRequest', grantAccess(['user']),sendBussinessRequest);
 module.exports = router;
