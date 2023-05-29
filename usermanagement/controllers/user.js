@@ -1,6 +1,50 @@
 const BankAccount = require("../models/BankAccount")
 const User = require("../models/user")
 const {getAllUser,getUserById}=require("../dal/user")
+
+
+exports.registerUser = async (req, res) => {
+    console.log(req.body)
+      try {
+        const { fname, lname, email_address, phone_number, password } = req.body;
+        const newId = uuidv4();
+        // Check if the email is already registered for a manager
+        const existingUser = await User.findOne({ where: { email_address } });
+        const existingManager = await Manager.findOne({ where: { email_address } });
+        const existingAgent = await Agent.findOne({ where: { email_address } });
+        if (existingUser || existingManager || existingAgent) {
+          return res.status(400).json({ message: 'Email already registered for a user' });
+        }
+    
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+    
+        // Create the manager
+        const user = await User.create({ fname,lname, email_address, phone_number, password: hashedPassword, role:"user",client_id:newId });
+         const jsontoken = jwt.sign({ id: user.user_id, email_address:user.email_address, role:user.role,client_id:user.client_id }, process.env.JWT_SECRET, {
+          expiresIn: "24hr",
+        });
+        res.status(201).json({ jsontoken });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'User registration failed' });
+      }
+    };
+  
+
+exports.loginUser=async (req, res)=>{
+    const {phone_number, password}=req.body
+    const user = await User.findOne({where:{
+      phone_number:phone_number
+    }})
+    const passwordMatch = bcrypt.compare(password,user.password)
+    if (passwordMatch) {
+      const token = jwt.sign({user_id:user.user_id, email_address:user.email_address, client_id:user.client_id, role:user.role},process.env.JWT_SECRET,{expiresIn:"24h"})
+      res.status(200).send({token:token})
+    }else{
+      res.status(401).send({message:"Invalid Credentials"})
+    }
+  }
 exports.getAllUser= async (req, res, next)=>{
   try {
     const result = await getAllUser()
