@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {grantAccess} = require('../../middlewares/userVerification');
-const {registerMerchant,loginMerchant}=require("../controllers/merchant")
+const {registerMerchant,loginMerchant,registerSales,loginSales}=require("../controllers/merchant")
 // Import your controllers
 const {
     getAllUser,
@@ -22,6 +22,9 @@ const {
 // router.get('/', grantAccess(['admin','user']), getAllUser);
 router.post('/register', registerMerchant);
 router.post('/login', loginMerchant);
+router.post('/sales/register', grantAccess(['merchant']), registerSales);
+router.post('/sales/login', loginSales);
+router.post('/activate', loginSales);
 // router.get('/:id', grantAccess(['user', 'admin']), getUserById);
 // router.get('/createAccount', grantAccess(['user']),createAccount);
 // router.get('/setPrimaryAccount', grantAccess(['user']),createAccount);
