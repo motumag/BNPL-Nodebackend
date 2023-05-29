@@ -1,46 +1,33 @@
 const { Sequelize, DataTypes } = require("sequelize");
-const sequelize=require("../config/db")
-const BankAccount=require("./BankAccount")
-const User = sequelize.define("users", {
-    user_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    fname: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    lname: {
-      type: DataTypes.STRING,
-      allowNull: false,
+module.exports = (sequelize, Sequelize) => {
+  const Merchant = sequelize.define("merchants", {
+    merchant_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
     email_address: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    emailStatus: {
+      type: String,
+      enum: ["Pending", "Active", "Inactive"],
+      default: "Pending",
+    },
     phone_number: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    client_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    secrate_key: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     role: {
       type: DataTypes.STRING,
-      default: "user",
+      default: "merchant",
       allowNull: false,
     },
   });
-  User.hasMany(BankAccount, { as: 'bankAccounts', foreignKey: 'user_id' });
-  module.exports=User
+  return Merchant;
+};
