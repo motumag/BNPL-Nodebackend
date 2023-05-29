@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken")
 const grantAccess = (roles) => {
     return (req, res, next) => {
-      console.log(req.params)
       const authHeader = req.headers.authorization;
       const token = authHeader && authHeader.split(' ')[1];
       console.log(token)
@@ -11,8 +10,9 @@ const grantAccess = (roles) => {
           if (err) {
             res.status(403).send("Forbidde")
           }else{
+            console.log(user.role)
             if (roles.includes(user.role)) {
-              
+              console.log() 
               next()
             }else{
               res.status(403).send("Forbidden")
