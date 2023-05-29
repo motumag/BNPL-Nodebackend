@@ -1,29 +1,24 @@
-const BankAccount = require("../models/BankAccount")
+// const BankAccount = require("../models/BankAccount")
 const User = require("../models/user")
-const {getAllUser,getUserById}=require("../dal/user")
-
+// const {getAllUser,getUserById}=require("../dal/user")
 
 exports.registerUser = async (req, res) => {
     console.log(req.body)
       try {
-        const { fname, lname, email_address, phone_number, password } = req.body;
-        const newId = uuidv4();
+        const { email_address, phone_number, password } = req.body;
         // Check if the email is already registered for a manager
         const existingUser = await User.findOne({ where: { email_address } });
-        const existingManager = await Manager.findOne({ where: { email_address } });
-        const existingAgent = await Agent.findOne({ where: { email_address } });
-        if (existingUser || existingManager || existingAgent) {
+        if (existingUser) {
           return res.status(400).json({ message: 'Email already registered for a user' });
         }
-    
         // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-    
+        const hashedPassword = await bcrypt.hash(password, 10);   
         // Create the manager
-        const user = await User.create({ fname,lname, email_address, phone_number, password: hashedPassword, role:"user",client_id:newId });
-         const jsontoken = jwt.sign({ id: user.user_id, email_address:user.email_address, role:user.role,client_id:user.client_id }, process.env.JWT_SECRET, {
+        const user = await User.create({ email_address, phone_number, password: hashedPassword, role:"user"});
+         const jsontoken = jwt.sign({ id: user.user_id, email_address:user.email_address, role:user.role}, process.env.JWT_SECRET, {
           expiresIn: "24hr",
         });
+        req.session.jwt = jsontoken
         res.status(201).json({ jsontoken });
       } catch (error) {
         console.error(error);

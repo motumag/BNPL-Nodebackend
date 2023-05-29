@@ -17,7 +17,7 @@ const {
     getNedajStation,
     getPrimaryAccount,
     setPrimaryAccount
-} = require('../controller/user');
+} = require('../controllers/user');
 // User routes
 router.get('/', grantAccess(['admin','user']), getAllUser);
 router.post('/register', registerUser);
