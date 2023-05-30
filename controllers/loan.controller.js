@@ -25,3 +25,18 @@ try {
     res.status(500).send(error)   
 }
 }
+exports.createNewLoan=async(req,res)=>{
+try {
+    const {id}=req.query; 
+   const merchant=await Merchant.findByPk(id,{include:LoanConfiguration})
+  if (merchant) {
+   const loans = merchant.loanconfs;
+   res.status(200).json(loans) 
+  }else{
+   res.status(400).json({message:"Not Found"})
+  }
+   
+} catch (error) {
+    res.status(500).send(error)   
+}
+}

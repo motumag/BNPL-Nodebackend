@@ -11,7 +11,7 @@ exports.getAllSales=async(req,res)=>{
     const {id}=req.query;
     const sales=await Sales.findAll({where:{
         merchant_id:id
-    },attributes: ['email_address', 'emailStatus','phone_number']});
+    },attributes: ['sales_id','email_address', 'emailStatus','phone_number']});
     res.status(200).json(sales) 
     } catch (error) {
     res.status(500).json({message:"Internal Server Error"})   
@@ -19,15 +19,16 @@ exports.getAllSales=async(req,res)=>{
 }
 exports.getSalesById=async(req,res)=>{
     try {
-        const {item_id,merchant_id}=req.query;
-        const items=await Items.findOne({where:{
-            item_id:item_id,
+        const {sales_id,merchant_id}=req.query;
+
+        const sales=await Sales.findOne({where:{
+            sales_id:sales_id,
             merchant_id:merchant_id
-        }});
-        if(!items){
+        },attributes: ['sales_id','email_address', 'emailStatus','phone_number']});
+        if(!sales){
             res.status(404).json({"message":"Their is no item with these Id"})
         }else{
-            res.status(200).json(items)
+            res.status(200).json(sales)
         }
     } catch (error) {
     res.status(500).json({message:"Internal Server Error"}) 

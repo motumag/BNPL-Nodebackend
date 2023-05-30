@@ -21,7 +21,8 @@ const {
     createNewItem,
     getAllItems,
     getItemsById,
-    assignItemsToSales
+    assignItemsToSales,
+    assignItemsToSalesApprove
 } = require('../controllers/item.controller');
 // User routes
 
@@ -29,5 +30,6 @@ router.post('/create', grantAccess(['merchant']), upload.single('picture'), crea
 router.get('/getAll', grantAccess(['merchant','sales']),  getAllItems);
 router.get('/getById',grantAccess(['merchant','sales']),  getItemsById);
 router.post('/assigntoSales',grantAccess(['merchant']),  assignItemsToSales);
+router.post('/acceptItem',grantAccess(['sales']),  assignItemsToSalesApprove);
 
 module.exports = router;
