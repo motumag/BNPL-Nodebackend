@@ -23,7 +23,7 @@ const {
 } = require('../controllers/item.controller');
 // User routes
 
-router.post('/create', grantAccess(['merchant']), upload.single('picture'), createNewItem);
+router.post('/create', grantAccess(['merchant']), createNewItem);
 router.get('/getAll',  getAllItems);
 
 module.exports = router;
