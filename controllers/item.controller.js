@@ -4,7 +4,7 @@ exports.createNewItem=async(req,res)=>{
     const { filename, path: filePath } = req.file;
     console.log(filename)
     try {
-    const item = Items.create({item_code,item_name, item_price,merchant_id, item_pic:filename})
+    const item = Items.create({item_code,item_name, item_price,merchant_id, item_pic:filename, item_type})
     res.status(201).json({ url: "http://localhost:5000/image/" + filename, message:"Created" });   
     } catch (error) {
        console.log('ERROR',error)

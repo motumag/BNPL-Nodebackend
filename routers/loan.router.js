@@ -1,29 +1,16 @@
 const express = require('express');
 const multer =require("multer")
 const router = express.Router();
-const {grantAccess} = require('../middlewares/userVerification');
-
-    // Set up Multer storage
-    const storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Set the destination directory for uploaded images
-        },
-        filename: (req, file, cb) => {
-        cb(null, file.originalname); // Use the original filename
-        },
-    });
-    // Create the Multer upload instance
-    const upload = multer({ storage: storage });
-    
+const {grantAccess} = require('../middlewares/userVerification');   
 
 // Import your controllers
 const {
-    createNewItem,
-    getAllItems
-} = require('../controllers/item.controller');
+    createNewLoanConfiguration,
+    getLoanConfiguration
+} = require('../controllers/loan.controller');
 // User routes
 
-router.post('/create', grantAccess(['merchant']), createNewItem);
-router.get('/getAll',  getAllItems);
+router.post('/create', grantAccess(['merchant']), createNewLoanConfiguration);
+router.get('/getAll', grantAccess(['merchant', 'sales']), getLoanConfiguration);
 
 module.exports = router;
