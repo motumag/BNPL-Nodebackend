@@ -12,7 +12,10 @@ exports.createNewItem=async(req,res)=>{
 }
 exports.getAllItems=async(req,res)=>{
 try {
-   const items=await Items.findAll({});
+    const {id}=req.query;
+   const items=await Items.findAll({
+    where:{merchant_id:id}
+   });
    console.log(items)
    res.status(200).json(items) 
 } catch (error) {console.log("error",error)    
@@ -20,8 +23,11 @@ try {
 }
 exports.getItemsById=async(req,res)=>{
 try {
-    const {id}=req.params.id;
-    const items=await Items.findById(id);
+    const {merchant_id,item_id}=req.query;
+    const items=await Items.findOne({where:{
+        merchant_id:merchant_id,
+        item_id:item_id
+    }});
     if(!items){
         res.status(404).json({"message":"Their is no item with these Id"})
     }else{
@@ -29,5 +35,21 @@ try {
     }
 } catch (error) {
     
+}
+}
+exports.assignItemsToSales=async(req,res)=>{
+try {
+    const {item_id,merchant_id,sales_id}=req.body;
+    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id}});
+    
+    if(!items){
+        res.status(404).json({"message":"Their is no item with these Id"})
+    }else{
+        items.sales_id=sales_id
+        items.save()
+        res.status(200).json(items)
+    }
+} catch (error) {
+    res.status(500).json({message:"Internal Server Error"})
 }
 }

@@ -19,11 +19,15 @@ const {grantAccess} = require('../middlewares/userVerification');
 // Import your controllers
 const {
     createNewItem,
-    getAllItems
+    getAllItems,
+    getItemsById,
+    assignItemsToSales
 } = require('../controllers/item.controller');
 // User routes
 
 router.post('/create', grantAccess(['merchant']), upload.single('picture'), createNewItem);
-router.get('/getAll',  getAllItems);
+router.get('/getAll', grantAccess(['merchant','sales']),  getAllItems);
+router.get('/getById',grantAccess(['merchant','sales']),  getItemsById);
+router.post('/assigntoSales',grantAccess(['merchant']),  assignItemsToSales);
 
 module.exports = router;
