@@ -12,7 +12,7 @@ const grantAccess = (roles) => {
           }else{
             console.log(user.role)
             if (roles.includes(user.role)) {
-              console.log() 
+              
               next()
             }else{
               res.status(403).send("Forbidden")

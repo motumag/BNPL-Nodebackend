@@ -22,12 +22,5 @@ const {
 // router.get('/', grantAccess(['admin','user']), getAllUser);
 router.post('/register', registerMerchant);
 router.post('/login', loginMerchant);
-router.post('/sales/register', grantAccess(['merchant']), registerSales);
-router.post('/sales/login', loginSales);
 router.get('/activate', activateAccount);
-// router.get('/:id', grantAccess(['user', 'admin']), getUserById);
-// router.get('/createAccount', grantAccess(['user']),createAccount);
-// router.get('/setPrimaryAccount', grantAccess(['user']),createAccount);
-// router.get('/generateApiKey', grantAccess(['user']),generateApiKey);
-// router.get('/bussinessRequest', grantAccess(['user']),sendBussinessRequest);
 module.exports = router;

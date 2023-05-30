@@ -26,6 +26,11 @@ const Items = sequelize.define("items", {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    itemStatus: {
+      type: DataTypes.STRING,
+      enum: ["Pending", "Accepted", "Available"],
+      defaultValue: "Available",
+    },
   });
 
 module.exports=Items;
