@@ -1,6 +1,7 @@
 const express = require("express")
 const cookieSession = require("cookie-session")
 const {json}=require("body-parser")
+const cors = require('cors');
 const db = require("./configs/db")
 const merchantManagementRouter=require("./usermanagement/router/merchant")
 const itemRouter=require("./routers/item.router")
@@ -12,6 +13,8 @@ app.use(
         secure:true
     })
 )
+app.use(cors("*"))
+app.use("/image",express.static("uploads"))
 app.use('/api/merchant',merchantManagementRouter)
 app.use('/api/items',itemRouter)
 const PORT=process.env.PORT

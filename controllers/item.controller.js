@@ -1,21 +1,20 @@
 const Items=require("../models/item.model")
 exports.createNewItem=async(req,res)=>{
-    const {item_name,item_code,item_price}=req.body;
+    const {item_name,item_code,item_price, item_type, merchant_id}=req.body;
+    const { filename, path: filePath } = req.file;
+    console.log(filename)
     try {
-    const item = Items.create({item_code,item_name, item_price})
-    res.status(200).json({"success":"Item created successfully",
-item})    
+    const item = Items.create({item_code,item_name, item_price,merchant_id, item_pic:filename})
+    res.status(201).json({ url: "http://localhost:5000/image/" + filename, message:"Created" });   
     } catch (error) {
-       console.log('ERROR',error) 
+       console.log('ERROR',error)
     }
 }
 exports.getAllItems=async(req,res)=>{
 try {
-   const allItems=Items.findAll();
-   res.status(200).json({
-    count : allItems.length,
-    allItems
-   }) 
+   const items=await Items.findAll({});
+   console.log(items)
+   res.status(200).json(items) 
 } catch (error) {console.log("error",error)    
 }
 }
@@ -31,6 +30,4 @@ try {
 } catch (error) {
     
 }
-
-
 }

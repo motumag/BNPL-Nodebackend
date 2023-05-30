@@ -18,6 +18,10 @@ const Items = sequelize.define("items", {
       type: DataTypes.STRING,
     allowNull:false
     },
+    item_type: {
+      type: DataTypes.STRING,
+       allowNull:false
+    },
     item_pic: {
       type: DataTypes.STRING,
       allowNull: true,
