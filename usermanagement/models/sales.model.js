@@ -1,6 +1,5 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize=require("../../configs/db")
-const Item = require("../../models/item.model");
 const Items = require("../../models/item.model");
 const Sales = sequelize.define("sales", {
     sales_id: {

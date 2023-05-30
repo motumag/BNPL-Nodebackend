@@ -30,6 +30,15 @@ async function testConnection() {
 //   .catch((error) => {
 //     console.error("Unable to create user table : ", error);
 //   });
+// sequelize
+//   .sync({ alter: true })
+//   .then(() => {
+//     console.log("Drop and Re sync the database!");
+//     // initial();
+//   })
+//   .catch((error) => {
+//     console.error("Unable to create user table : ", error);
+//   });
 
 testConnection();
 

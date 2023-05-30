@@ -15,14 +15,14 @@ exports.registerMerchant = async (req, res) => {
         const isPhone = phoneRegex.test(username);
         // Check if the email is already registered for a manager
         if (isEmail) {
-          const existingUser = await Merchant.findOne({ where: { email_address } });
+          const existingUser = await Merchant.findOne({ where: { email_address:username } });
         if (existingUser) {
           return res.status(400).json({ message: 'Email already registered for a merchant' });
         }
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);   
         // Create the manager
-        const merchant = await Merchant.create({ email_address:email_address, password: hashedPassword});
+        const merchant = await Merchant.create({ email_address:username, password: hashedPassword});
          const jsontoken = jwt.sign({ id: merchant.merchant_id, email_address:merchant.email_address, role:merchant.role}, process.env.JWT_SECRET, {
           expiresIn: "24hr",
         });
@@ -150,6 +150,7 @@ exports.loginSales=async (req, res)=>{
         const sales = await Sales.findOne({where:{
           phone_number:username
         }})
+        console.log(sales)
         if (sales){
           if (sales.emailStatus=="Pending") {
             res.status(403).json({message:"In active Account"})
@@ -180,7 +181,7 @@ exports.loginSales=async (req, res)=>{
   }
 exports.registerSales= async (req, res, next)=>{
   try {
-    const { username, password, merchant_id } = req.body;
+    const { username, merchant_id } = req.body;
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const phoneRegex = /^\d{10}$/;
     const isEmail = emailRegex.test(username);
@@ -200,8 +201,8 @@ exports.registerSales= async (req, res, next)=>{
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);   
     // Create the manager
-    await Sales.create({ email_address:username, password: hashedPassword, merchant_id:existingMerchant.merchant_id});
-    utils.sendEmail(sales.sales_id,sales.email_address)
+    const registeredSales=await Sales.create({ email_address:username, password: hashedPassword, merchant_id:existingMerchant.merchant_id});
+    utils.sendEmail(registeredSales.sales_id,registeredSales.email_address)
     res.status(201).json({ "status":"success",password });
     }
     }else if(isPhone){
@@ -218,8 +219,8 @@ exports.registerSales= async (req, res, next)=>{
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);   
     // Create the manager
-    await Sales.create({ email_address:username, password: hashedPassword, merchant_id:existingmerchant.merchant_id});
-    utils.sendMessage(sales.sales_id, sales.phone_number)
+    const registeredSales=await Sales.create({ phone_number:username, password: hashedPassword, merchant_id:existingmerchant.merchant_id});
+    utils.sendMessage(registeredSales.sales_id, registeredSales.phone_number)
     res.status(201).json({ "status":"success",password });
     }
     }

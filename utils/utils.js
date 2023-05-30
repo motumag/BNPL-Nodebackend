@@ -45,7 +45,8 @@ function shuffleString(str) {
 }
 
 exports.sendEmail= (id,email_address, type="sales")=>{
-const registerUrl = `http://localhost:3000/activation?id=${id}&type=${type}`;    
+const registerUrl = `http://localhost:5000/api/merchant/activate?id=${id}&type=${type}`;
+const subject="Activation Link"    
 // Create a transporter with your SMTP configuration
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -59,7 +60,7 @@ var mailOptions = {
     from: "amaedris1@gmail.com",
     to: email_address,
     subject: subject,
-    text: message + " " + registerUrl,
+    text:  registerUrl,
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
