@@ -10,7 +10,7 @@ const {
 } = require('../controllers/loan.controller');
 // User routes
 
-router.post('/create', grantAccess(['sales']), createNewLoanConfiguration);
+router.post('/create', grantAccess(['merchant']), createNewLoanConfiguration);
 router.get('/getAll', grantAccess(['merchant', 'sales']), getLoanConfiguration);
 
 module.exports = router;

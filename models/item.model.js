@@ -34,7 +34,16 @@ const Items = sequelize.define("items", {
     },
   });
 
-Items.hasMany(LoanConf, {foreignKey:"item_id"})
-LoanConf.belongsTo(Items, {foreignKey:"item_id"})
-
+  Items.belongsToMany(LoanConf, {
+    through: 'items_loan',
+    foreignKey: 'item_id', // replaces `productId`
+    otherKey: 'loan_conf_id', // replaces `categoryId`
+    as: 'loanConfs' 
+  });
+  LoanConf.belongsToMany(Items, {
+    through: 'items_loan',
+    foreignKey: 'loan_conf_id', // replaces `categoryId`
+    otherKey: 'item_id', // replaces `productId`
+    as: 'items'
+  });
 module.exports=Items;

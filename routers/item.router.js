@@ -22,7 +22,8 @@ const {
     getAllItems,
     getItemsById,
     assignItemsToSales,
-    assignItemsToSalesApprove
+    assignItemsToSalesApprove,
+    configureLoanForitem
 } = require('../controllers/item.controller');
 // User routes
 
@@ -31,5 +32,6 @@ router.get('/getAll', grantAccess(['merchant','sales']),  getAllItems);
 router.get('/getById',grantAccess(['merchant','sales']),  getItemsById);
 router.post('/assigntoSales',grantAccess(['merchant']),  assignItemsToSales);
 router.post('/acceptItem',grantAccess(['sales']),  assignItemsToSalesApprove);
+router.post('/configureLoanForItem',grantAccess(['merchant']),  configureLoanForitem);
 
 module.exports = router;

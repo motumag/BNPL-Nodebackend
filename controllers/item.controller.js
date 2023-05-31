@@ -1,4 +1,5 @@
 const Items=require("../models/item.model")
+const LoanConfig=require("../models/LoanConfig.models")
 exports.createNewItem=async(req,res)=>{  
     try {
     const {item_name,item_code,item_price, item_type, merchant_id}=req.body;
@@ -14,8 +15,8 @@ exports.getAllItems=async(req,res)=>{
 try {
     const {id}=req.query;
    const items=await Items.findAll({
-    where:{merchant_id:id}
-   });
+    where:{merchant_id:id},  include:{model:LoanConfig, as:"loanConfs"}}
+   );
    console.log(items)
    res.status(200).json(items) 
 } catch (error) {console.log("error",error)    
@@ -66,6 +67,20 @@ try {
         res.status(200).json({status:"success"})
     }
 } catch (error) {
+    res.status(500).json({message:"Internal Server Error"})
+}
+}
+
+exports.configureLoanForitem=async(req,res)=>{
+    const {item_id, loan_config_id}=req.body;
+try {
+   const item = await Items.findOne({where:{item_id:item_id}, include:{model:LoanConfig,as:"loanConfs"}})
+   const loanConf=await LoanConfig.findOne({where:{loan_conf_id:loan_config_id}, include:{model:Items,as:"items"}})
+//    await item.addloanconfs(loanConf)
+   await item.addLoanConfs(loanConf);
+   res.status(200).json(item)
+} catch (error) {
+    console.error(error)
     res.status(500).json({message:"Internal Server Error"})
 }
 }
