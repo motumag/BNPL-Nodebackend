@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
 const { json } = require("body-parser");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const db = require("./configs/db");
 const merchantManagementRouter = require("./usermanagement/router/merchant");
@@ -10,6 +11,8 @@ const loanRouter = require("./routers/loan.router");
 const salesRouter = require("./routers/sales.router");
 const app = express();
 app.use(json());
+app.use(bodyParser.json());
+// app.use(express.json());
 app.use(
   cookieSession({
     signed: false,

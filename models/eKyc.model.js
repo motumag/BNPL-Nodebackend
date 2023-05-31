@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
-const Kyc = sequelize.define("merchant_kyc", {
+const Kyc = sequelize.define("merchant_ekyc", {
   kyc_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -61,7 +61,7 @@ const Kyc = sequelize.define("merchant_kyc", {
   merchant_status: {
     type: DataTypes.STRING,
     enum: ["Pending", "Accepted", "Available"],
-    defaultValue: "Available",
+    defaultValue: "Pending",
   },
 });
 
