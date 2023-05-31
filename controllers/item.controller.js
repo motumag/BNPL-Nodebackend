@@ -8,8 +8,19 @@ exports.createNewItem=async(req,res)=>{
     const item = await Items.create({item_code,item_name, item_price,merchant_id, item_pic:filename, item_type,loan_limit:loan_limit})
     res.status(201).json({ url: "http://localhost:5000/image/" + filename, message:"Created" });   
     } catch (error) {
-       console.log('ERROR',error)
+       res.status(500).json({message:"Internal Server Error"})
     }
+}
+exports.editItemById=async(req,res)=>{  
+    try {
+        const {item_name,item_code,item_price, item_type, merchant_id,loan_limit}=req.body;
+        const { filename, path: filePath } = req.file;
+        console.log(req.body, req.file)
+        const item = await Items.update({item_code,item_name, item_price,merchant_id, item_pic:filename, item_type,loan_limit:loan_limit},{where:{item_id:req.params.id}})
+        res.status(201).json({ url: "http://localhost:5000/image/" + item, message:"updated" });
+        } catch (error) {
+         res.status(500).json({message:"Interna Server Error"})
+        }
 }
 exports.getAllItems=async(req,res)=>{
 try {

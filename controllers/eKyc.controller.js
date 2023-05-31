@@ -19,6 +19,7 @@ exports.createNewEkyc = async (req, res) => {
       merchant_id
     } = req.body;
     var {agreement_doc,business_license,valid_identification}=req.files;
+    console.log(req.files)
     const agreement_doc_path = agreement_doc[0].path
     const business_license_path = business_license[0].path
     const valid_identification_path = valid_identification[0].path
