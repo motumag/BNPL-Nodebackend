@@ -1,6 +1,9 @@
 const Ekyc = require("../models/eKyc.model");
 exports.createNewEkyc = async (req, res) => {
   try {
+    console.log("data", req.body);
+
+    // console.log("The incomming req is: ", inc.compliance_aml);
     const {
       first_name,
       last_name,
@@ -14,6 +17,7 @@ exports.createNewEkyc = async (req, res) => {
       compliance_aml,
       merchant_status,
     } = req.body;
+
     //create the ekyc
     const newEkyc = await Ekyc.create({
       first_name,
@@ -26,11 +30,12 @@ exports.createNewEkyc = async (req, res) => {
       legal_entity_type,
       date_of_establishment,
       compliance_aml,
-      agreement_doc: req.files["agreement_doc"][0].path, // Store the agreement_doc file path
-      business_license: req.files["business_license"][0].path, // Store the business_license file path
-      valid_identification: req.files["valid_identification"][0].path, // Store the valid_identification file path
+      //   agreement_doc: req.files["agreement_doc"][0].path, // Store the agreement_doc file path
+      //   business_license: req.files["business_license"][0].path, // Store the business_license file path
+      //   valid_identification: req.files["valid_identification"][0].path, // Store the valid_identification file path
       merchant_status,
     });
+    console.log("The incommig req is:", newEkyc);
     res.json(newEkyc);
   } catch (error) {
     console.error("Error creating business:", error);
