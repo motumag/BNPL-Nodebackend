@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize=require("../../configs/db")
 const Items = require("../../models/item.model");
+const SalesKyc = require("../../models/salesKyc.models")
 const Sales = sequelize.define("sales", {
     sales_id: {
       type: DataTypes.INTEGER,
@@ -28,8 +29,15 @@ const Sales = sequelize.define("sales", {
       type: DataTypes.STRING,
       defaultValue: "sales",
       allowNull: false,
-    }
+    },
+    status: {
+      type: DataTypes.STRING,
+      enum: ["Pending", "Approved", "Declained"],
+      defaultValue: "Pending",
+    },
   });
 Sales.hasMany(Items,{foreignKey:"sales_id"})
 Items.belongsTo(Items,{foreignKey:"sales_id"})
+Sales.hasOne(SalesKyc,{foreignKey:"sales_id", as:"salesKyc"})
+SalesKyc.belongsTo(Sales,{foreignKey:"sales_id", as:"sales"})
 module.exports=Sales;

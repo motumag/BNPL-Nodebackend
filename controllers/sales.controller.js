@@ -4,7 +4,8 @@ const Sales = require("../usermanagement/models/sales.model")
 const Merchant = require("../usermanagement/models/merchant.model")
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const utils = require("../utils/utils")
+const utils = require("../utils/utils");
+const SalesKyc = require("../models/salesKyc.models");
 exports.getAllSales=async(req,res)=>{
     
     try {
@@ -150,5 +151,60 @@ exports.registerSales= async (req, res, next)=>{
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Merchant registration failed' });
+  }
+}
+exports.sendRequestForApproval = async (req, res) => {
+  try {
+    const { first_name, last_name,tin_number,sales_id} = req.body;
+    const { filename, path: filePath } = req.file;
+    
+    const sales = await Sales.findOne({ where: { sales_id } });
+    const salesKyc = await SalesKyc.findOne({ where: { sales_id } });
+    if (!sales) {
+      return res.status(400).json({ message: 'Sales Not Found' });
+    }else{
+      if (salesKyc) {
+        return res.status(409).json({ message: 'Sales Kyc Already Exist' });
+      }else{
+         await SalesKyc.create({
+          sales_id,
+          first_name,
+          last_name,
+          tin_number,
+          valid_identification:filename
+        });
+        res.status(201).json({ message: 'Sales Kyc Created' });
+      }
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+exports.getAllSalesKyc = async (req, res, next) => {
+  try {
+    const {merchant_id}=req.query;
+    console.log(merchant_id)
+    const salesKyc = await SalesKyc.findAll({include:{model:Sales, as:"sales", where:{merchant_id:merchant_id}, attributes:["email_address","phone_number","status"]}});
+    res.status(200).json(salesKyc);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+exports.approveSalesKyc= async (req,res,next)=>{
+  try {
+    const {kyc_id}=req.body;
+    const salesKyc = await SalesKyc.findOne({where:{sales_id}});
+    if (!salesKyc) {
+      return res.status(400).json({ message: 'Sales Kyc Not Found' });
+    }else{
+      await salesKyc.update({status:"Approved"});
+      res.status(200).json({ message: 'Sales Kyc Approved' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }

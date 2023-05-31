@@ -1,14 +1,22 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize=require("../configs/db")
 const ItemsLoan  = sequelize.define("items_loan", {
-    items_loan_id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    totalAmountWithInterest: {
-      type: DataTypes.DECIMAL(5,2),
-      allowNull: true,
-    }
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  loan_conf_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  item_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  totalAmountWithInterest: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  }
   });
 module.exports=ItemsLoan;
