@@ -4,7 +4,8 @@ const Sales = require("../usermanagement/models/sales.model")
 const Merchant = require("../usermanagement/models/merchant.model")
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const utils = require("../utils/utils")
+const utils = require("../utils/utils");
+const SalesKyc = require("../models/salesKyc.models");
 exports.getAllSales=async(req,res)=>{
     
     try {
@@ -154,19 +155,38 @@ exports.registerSales= async (req, res, next)=>{
 }
 exports.sendRequestForApproval = async (req, res) => {
   try {
-    const { first_name, last_name,tin_number,valid_identification,sales_id} = req.body;
+    const { first_name, last_name,tin_number,sales_id} = req.body;
+    const { filename, path: filePath } = req.file;
     const sales = await Sales.findOne({ where: { sales_id } });
+    const salesKyc = await SalesKyc.findOne({ where: { sales_id } });
     if (!sales) {
-      return res.status(404).json({ message: 'Sales Not Found' });
+      return res.status(400).json({ message: 'Sales Not Found' });
+    }else{
+      if (salesKyc) {
+        return res.status(409).json({ message: 'Sales Kyc Already Exist' });
+      }else{
+         await SalesKyc.create({
+          sales_id,
+          first_name,
+          last_name,
+          tin_number,
+          valid_identification:filename
+        });
+        res.status(201).json({ message: 'Sales Kyc Created' });
+      }
     }
-    if (sales.emailStatus === "Pending") {
-      return res.status(400).json({ message: 'Sales Already Approved' });
-    }
-    sales.emailStatus = "Pending";
-    await sales.save();
-    res.status(200).json({ message: 'Sales Approved' });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Sales Approval failed' });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+exports.getAllSalesKyc = async (req, res, next) => {
+  try {
+    const salesKyc = await SalesKyc.findAll();
+    res.status(200).json(salesKyc);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
