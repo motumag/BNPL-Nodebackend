@@ -157,6 +157,7 @@ exports.sendRequestForApproval = async (req, res) => {
   try {
     const { first_name, last_name,tin_number,sales_id} = req.body;
     const { filename, path: filePath } = req.file;
+    
     const sales = await Sales.findOne({ where: { sales_id } });
     const salesKyc = await SalesKyc.findOne({ where: { sales_id } });
     if (!sales) {

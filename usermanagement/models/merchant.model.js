@@ -3,7 +3,7 @@ const sequelize = require("../../configs/db");
 const Sales = require("./sales.model");
 const Items = require("../../models/item.model");
 const LoanConf = require("../../models/LoanConfig.models");
-
+const kyc = require("../../models/eKyc.model");
 const Merchant = sequelize.define("merchants", {
   merchant_id: {
     type: DataTypes.INTEGER,
@@ -39,4 +39,6 @@ Merchant.hasMany(Items, { foreignKey: "merchant_id" });
 Items.belongsTo(Merchant, { foreignKey: "merchant_id" });
 Merchant.hasMany(LoanConf, { foreignKey: "merchant_id" });
 LoanConf.belongsTo(Merchant, { foreignKey: "merchant_id" });
+Merchant.hasOne(kyc,{foreignKey:"merchant_id", as:"merchantKyc"})
+kyc.belongsTo(Merchant,{foreignKey:"merchant_id", as:"merchantkyc"})
 module.exports = Merchant;

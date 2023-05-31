@@ -2,8 +2,29 @@ const express = require("express");
 const multer = require("multer");
 const router = express.Router();
 const path = require("path");
-const { createNewEkyc } = require("../controllers/eKyc.controller"); // Import the controller function
-
+const {grantAccess} = require('../middlewares/userVerification');  
 // API endpoint to handle image uploads
-router.post("/create", createNewEkyc);
+const {
+    createNewEkyc,createNewEkycDuplicate
+}=require('../controllers/eKyc.controller'); 
+const merchantUpload = multer.diskStorage({
+    destination: (req, file, cb) => {
+    cb(null, 'uploads/merchantKyc'); // Set the destination directory for uploaded images
+    },
+    filename: (req, file, cb) => {
+    cb(null, file.originalname); // Use the original filename
+    },
+});
+const uploadArray = multer({ storage:merchantUpload});
+
+router.post("/create", grantAccess(['merchant']),  uploadArray.fields([{
+    name: 'agreement_doc',
+    maxCount: 1
+},{
+    name:'business_license',
+    maxCount: 1
+},{ 
+    name:'valid_identification',
+    maxCount: 1
+}]), createNewEkyc);
 module.exports = router;
