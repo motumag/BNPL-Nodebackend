@@ -152,3 +152,21 @@ exports.registerSales= async (req, res, next)=>{
     res.status(500).json({ message: 'Merchant registration failed' });
   }
 }
+exports.sendRequestForApproval = async (req, res) => {
+  try {
+    const { first_name, last_name,tin_number,valid_identification,sales_id} = req.body;
+    const sales = await Sales.findOne({ where: { sales_id } });
+    if (!sales) {
+      return res.status(404).json({ message: 'Sales Not Found' });
+    }
+    if (sales.emailStatus === "Pending") {
+      return res.status(400).json({ message: 'Sales Already Approved' });
+    }
+    sales.emailStatus = "Pending";
+    await sales.save();
+    res.status(200).json({ message: 'Sales Approved' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Sales Approval failed' });
+  }
+}
