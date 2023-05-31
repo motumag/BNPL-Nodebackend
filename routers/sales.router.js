@@ -28,6 +28,6 @@ router.post('/login', loginSales);
 router.get('/getAll', grantAccess(['merchant', 'sales']), getAllSales);
 router.get('/getById', grantAccess(['merchant']), getSalesById);
 router.post('/kycRequest', grantAccess(['sales']),upload.single('valid_identification'), sendRequestForApproval);
-router.post('/getAllKyc', grantAccess(['merchant']), getAllSalesKyc);
+router.get('/getAllKyc', grantAccess(['merchant']), getAllSalesKyc);
 
 module.exports = router;

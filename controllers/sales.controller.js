@@ -183,7 +183,9 @@ exports.sendRequestForApproval = async (req, res) => {
 }
 exports.getAllSalesKyc = async (req, res, next) => {
   try {
-    const salesKyc = await SalesKyc.findAll();
+    const {merchant_id}=req.query;
+    console.log(merchant_id)
+    const salesKyc = await SalesKyc.findAll({include:{model:Sales, as:"sales", where:{merchant_id:merchant_id}, attributes:["email_address","phone_number","status"]}});
     res.status(200).json(salesKyc);
   } catch (error) {
     console.error(error);
