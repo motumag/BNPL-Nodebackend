@@ -3,7 +3,7 @@ const Merchant = require("../usermanagement/models/merchant.model");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 exports.createNewEkyc = async (req, res) => {
   try {
-    // console.log("The incomming req is: ", inc.compliance_aml);
+    console.log("The merchant_id req is: ", req.body.merchant_id);
     const {
       first_name,
       last_name,
@@ -16,21 +16,31 @@ exports.createNewEkyc = async (req, res) => {
       date_of_establishment,
       compliance_aml,
       merchant_status,
-      merchant_id
+      merchant_id,
     } = req.body;
-    var {agreement_doc,business_license,valid_identification}=req.files;
-    const agreement_doc_path = agreement_doc[0].path
-    const business_license_path = business_license[0].path
-    const valid_identification_path = valid_identification[0].path
-    const agreament_doc_cleaned_path = agreement_doc_path.replace("uploads\\",'')
-    const business_license_cleaned_path = business_license_path.replace("uploads\\",'')
-    const valid_identification_cleaned_path = valid_identification_path.replace("uploads\\",'')
+    var { agreement_doc, business_license, valid_identification } = req.files;
+    const agreement_doc_path = agreement_doc[0].path;
+    const business_license_path = business_license[0].path;
+    const valid_identification_path = valid_identification[0].path;
+    const agreament_doc_cleaned_path = agreement_doc_path.replace(
+      "uploads\\",
+      ""
+    );
+    const business_license_cleaned_path = business_license_path.replace(
+      "uploads\\",
+      ""
+    );
+    const valid_identification_cleaned_path = valid_identification_path.replace(
+      "uploads\\",
+      ""
+    );
     //create the ekyc
-    // const merchant = await Merchant.findOne({ where: { sales_id } });
-    const existingKyc = await Ekyc.findOne({where:{merchant_id:merchant_id}})
+    const existingKyc = await Ekyc.findOne({
+      where: { merchant_id: merchant_id },
+    });
     if (existingKyc) {
       return res.status(409).json({ error: "Ekyc already exists" });
-    }else{
+    } else {
       const newEkyc = await Ekyc.create({
         first_name,
         last_name,
@@ -42,11 +52,13 @@ exports.createNewEkyc = async (req, res) => {
         legal_entity_type,
         date_of_establishment,
         compliance_aml,
-        agreement_doc: IMAGE_UPLOAD_BASE_URL+agreament_doc_cleaned_path, // Store the agreement_doc file path
-        business_licnense: IMAGE_UPLOAD_BASE_URL+business_license_cleaned_path, // Store the business_license file path
-        valid_identification: IMAGE_UPLOAD_BASE_URL+valid_identification_cleaned_path, // Store the valid_identification file path
+        agreement_doc: IMAGE_UPLOAD_BASE_URL + agreament_doc_cleaned_path, // Store the agreement_doc file path
+        business_licnense:
+          IMAGE_UPLOAD_BASE_URL + business_license_cleaned_path, // Store the business_license file path
+        valid_identification:
+          IMAGE_UPLOAD_BASE_URL + valid_identification_cleaned_path, // Store the valid_identification file path
         merchant_status,
-        merchant_id:merchant_id
+        merchant_id: merchant_id,
       });
       res.json(newEkyc);
     }
@@ -73,5 +85,5 @@ exports.createNewEkycDuplicate = async function (req, res, next) {
   } = req.body;
   console.log(req.body);
   //create the ekyc
-  res.status(200).send(req.body)
-}
+  res.status(200).send(req.body);
+};
