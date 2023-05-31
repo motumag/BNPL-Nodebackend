@@ -28,7 +28,12 @@ const Sales = sequelize.define("sales", {
       type: DataTypes.STRING,
       defaultValue: "sales",
       allowNull: false,
-    }
+    },
+    status: {
+      type: DataTypes.STRING,
+      enum: ["Pending", "Approved", "Declained"],
+      defaultValue: "Pending",
+    },
   });
 Sales.hasMany(Items,{foreignKey:"sales_id"})
 Items.belongsTo(Items,{foreignKey:"sales_id"})
