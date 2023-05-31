@@ -13,11 +13,22 @@ exports.createNewItem=async(req,res)=>{
 }
 exports.editItemById=async(req,res)=>{  
     try {
-        const {item_name,item_code,item_price, item_type, merchant_id,loan_limit}=req.body;
+        const {item_name,item_code,item_price, item_type, merchant_id,loan_limit,item_id}=req.body;
         const { filename, path: filePath } = req.file;
         console.log(req.body, req.file)
-        const item = await Items.update({item_code,item_name, item_price,merchant_id, item_pic:filename, item_type,loan_limit:loan_limit},{where:{item_id:req.params.id}})
-        res.status(201).json({ url: "http://localhost:5000/image/" + item, message:"updated" });
+        const item = await Items.findOne({where: {item_id:item_id}})
+        if (item) {
+            item.item_type=item_type;
+            item.item_name=item_name;
+            item.item_price=item_price;
+            item.merchant_id=merchant_id;
+            item.item_pic=filename;
+            item.loan_limit=loan_limit;
+            await item.save();
+            res.status(201).json({ url: "http://localhost:5000/image/" + filename, message:"updated" });
+        }else{
+            res.status(400).json({message:"Item not found"})
+        }
         } catch (error) {
          res.status(500).json({message:"Interna Server Error"})
         }
@@ -52,12 +63,21 @@ try {
 exports.assignItemsToSales=async(req,res)=>{
 try {
     const {item_id,merchant_id,sales_id}=req.body;
-    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id,itemStatus:"Available"}});
+    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id,itemStatus:"Available"},include:{model:LoanConfig, as:"loanConfs"}});
     if(!items){
         res.status(404).json({"message":"Their is no item with these Id"})
     }else{
         items.sales_id=sales_id
         items.itemStatus="Pending"
+        
+        if (items.loanConfs.length > 0) {
+        const principal = (parseInt(items.loan_limit)/100)*parseInt(items.item_price)
+        const interestRate=parseFloat(items.loanConfs[0].interest_rate)/100
+        const loanDuration = parseInt(items.loanConfs[0].duration)
+        const interestAmount = principal*interestRate
+        const totalAmount=principal+interestAmount
+            await items.addLoanConfs(loanConf, {through:{totalAmountWithInterest:totalAmount}});
+        }
         items.save()
         res.status(200).json({status:"success"})
     }

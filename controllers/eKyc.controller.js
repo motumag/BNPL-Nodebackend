@@ -20,6 +20,7 @@ exports.createNewEkyc = async (req, res) => {
     } = req.body;
     var {agreement_doc,business_license,valid_identification}=req.files;
     console.log(req.files)
+    console.log(req.body)
     const agreement_doc_path = agreement_doc[0].path
     const business_license_path = business_license[0].path
     const valid_identification_path = valid_identification[0].path
@@ -49,7 +50,7 @@ exports.createNewEkyc = async (req, res) => {
         merchant_status,
         merchant_id:merchant_id
       });
-      res.json(newEkyc);
+      res.status(200).json(newEkyc);
     }
   } catch (error) {
     console.error("Error creating business:", error);

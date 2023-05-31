@@ -42,5 +42,5 @@ router.post(
   grantAccess(["merchant"]),
   configureLoanForitem
 );
-router.put("/editItem", grantAccess(["merchant"]), editItemById);
+router.put("/editItem", grantAccess(["merchant"]), upload.single("picture"),editItemById);
 module.exports = router;
