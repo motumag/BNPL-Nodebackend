@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize=require("../configs/db")
+const LoanConf = require("./LoanConfig.models")
 const Items = sequelize.define("items", {
     item_id: {
       type: DataTypes.INTEGER,
@@ -32,5 +33,8 @@ const Items = sequelize.define("items", {
       defaultValue: "Available",
     },
   });
+
+Items.hasMany(LoanConf, {foreignKey:"item_id"})
+LoanConf.belongsTo(Items, {foreignKey:"item_id"})
 
 module.exports=Items;
