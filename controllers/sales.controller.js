@@ -192,3 +192,18 @@ exports.getAllSalesKyc = async (req, res, next) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+exports.approveSalesKyc= async (req,res,next)=>{
+  try {
+    const {kyc_id}=req.body;
+    const salesKyc = await SalesKyc.findOne({where:{sales_id}});
+    if (!salesKyc) {
+      return res.status(400).json({ message: 'Sales Kyc Not Found' });
+    }else{
+      await salesKyc.update({status:"Approved"});
+      res.status(200).json({ message: 'Sales Kyc Approved' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
