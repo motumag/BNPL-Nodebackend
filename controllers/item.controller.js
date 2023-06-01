@@ -16,10 +16,9 @@ exports.editItemById=async(req,res)=>{
     try {
         const {item_name,item_code,item_price, item_type, merchant_id,loan_limit,item_id}=req.body;
         const { filename, path: filePath } = req.file;
-        const item = await Items.findOne({where: {item_id:item_id}})
-        const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }, include:{LoanConfig, as:"loanConfs"} });
-        console.log(loanItems)
-        console.log(item)
+        const item = await Items.findOne({where: {item_id:item_id},include:{model:LoanConfig, as:"loanConfs"}})
+        console.log(item);
+        // const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }, include:{model:LoanConfig, as:"loanConfs"}});
         if (item) {
             item.item_type=item_type;
             item.item_name=item_name;
@@ -28,12 +27,22 @@ exports.editItemById=async(req,res)=>{
             item.item_pic=filename;
             item.loan_limit=loan_limit;
             await item.save();
-            res.status(201).json({ url: "http://localhost:5000/image/" + filename, message:"updated" });
+        for (const loanItem of item.loanConfs) {
+            const principal = (parseInt(item.loan_limit)/100)*parseInt(item.item_price)
+            const interestRate=parseFloat(loanItem.interest_rate)/100
+            const loanDuration = parseInt(loanItem.duration)
+            const interestAmount = principal*interestRate
+            const totalAmount=principal+interestAmount
+            loanItem.items_loan.totalAmountWithInterest = totalAmount; // Update the quantity based on the edited item
+            await loanItem.save();
+        }
+            res.status(201).json({ item: item, message:"updated" });
         }else{
             res.status(400).json({message:"Item not found"})
         }
         } catch (error) {
-         res.status(500).json({message:"Interna Server Error"})
+            console.error(error);
+         res.status(500).json({message:error})
         }
 }
 exports.getAllItems=async(req,res)=>{

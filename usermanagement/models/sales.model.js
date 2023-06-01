@@ -37,7 +37,7 @@ const Sales = sequelize.define("sales", {
     },
   });
 Sales.hasMany(Items,{foreignKey:"sales_id"})
-Items.belongsTo(Items,{foreignKey:"sales_id"})
+Items.belongsTo(Sales,{foreignKey:"sales_id"})
 Sales.hasOne(SalesKyc,{foreignKey:"sales_id", as:"salesKyc"})
 SalesKyc.belongsTo(Sales,{foreignKey:"sales_id", as:"sales"})
 module.exports=Sales;
