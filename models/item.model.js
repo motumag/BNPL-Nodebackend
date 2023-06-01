@@ -37,6 +37,10 @@ const Items = sequelize.define("items", {
       enum: ["Pending", "Accepted", "Available"],
       defaultValue: "Available",
     },
+    status: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
   });
 
   Items.belongsToMany(LoanConf, {
