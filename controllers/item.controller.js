@@ -1,6 +1,7 @@
 const Items=require("../models/item.model")
 const LoanConfig=require("../models/LoanConfig.models")
 const ItemsLoan=require("../models/itemsLoan.model")
+const Sales = require("../usermanagement/models/sales.model")
 exports.createNewItem=async(req,res)=>{  
     try {
     const {item_name,item_code,item_price, item_type, merchant_id,loan_limit}=req.body;
@@ -18,7 +19,8 @@ exports.editItemById=async(req,res)=>{
         const { filename, path: filePath } = req.file;
         const item = await Items.findOne({where: {item_id:item_id},include:{model:LoanConfig, as:"loanConfs"}})
         console.log(item);
-        // const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }, include:{model:LoanConfig, as:"loanConfs"}});
+        const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }});
+        console.log(loanItems)
         if (item) {
             item.item_type=item_type;
             item.item_name=item_name;
@@ -33,8 +35,8 @@ exports.editItemById=async(req,res)=>{
             const loanDuration = parseInt(loanItem.duration)
             const interestAmount = principal*interestRate
             const totalAmount=principal+interestAmount
-            loanItem.items_loan.totalAmountWithInterest = totalAmount; // Update the quantity based on the edited item
-            await loanItem.save();
+            loanItems.totalAmountWithInterest = totalAmount; // Update the quantity based on the edited item
+            await loanItems.save();
         }
             res.status(201).json({ item: item, message:"updated" });
         }else{
@@ -49,7 +51,7 @@ exports.getAllItems=async(req,res)=>{
 try {
     const {id}=req.query;
    const items=await Items.findAll({
-    where:{merchant_id:id}, include:{model:LoanConfig, as:"loanConfs", attributes:["interest_rate","duration"], through:{attributes:["totalAmountWithInterest"]}}}
+    where:{merchant_id:id}, include:[{model:Sales, as:"sales", attributes:["sales_id", "email_address","emailStatus","phone_number","status"], through:{attributes:[]}},{model:LoanConfig, as:"loanConfs", attributes:["interest_rate","duration"], through:{attributes:["totalAmountWithInterest"]}}]}
    );
    console.log(items)
    res.status(200).json(items) 
@@ -75,18 +77,14 @@ try {
 exports.assignItemsToSales=async(req,res)=>{
 try {
     const {item_id,merchant_id,sales_id}=req.body;
-    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id,itemStatus:"Available"},include:{model:LoanConfig, as:"loanConfs"}});
-    if(!items){
-        res.status(404).json({"message":"Their is no item with these Id"})
-    }else{
-        items.sales_id=sales_id
+    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id,itemStatus:"Available"},include:{model:Sales, as:"sales"}});
+    const sales = await Sales.findOne({where:{sales_id:sales_id}, include:{model:Items,as:"items"}})
+    if(!items || !sales){
+        res.status(404).json({"message":"No Record Found"})
+    }else{       
         items.itemStatus="Pending"
-        try {
-            await items.save()
-        } catch (error) {
-            console.error(error)
-        }
-        
+        await items.addSales(sales);
+        await items.save()        
         res.status(200).json({status:"success"})
     }
 } catch (error) {
@@ -112,10 +110,10 @@ try {
 }
 
 exports.configureLoanForitem=async(req,res)=>{
-const {item_id, loan_config_id}=req.body;
+const {item_id, loan_conf_id}=req.body;
 try {
    const item = await Items.findOne({where:{item_id:item_id}, include:{model:LoanConfig,as:"loanConfs"}})
-   const loanConf=await LoanConfig.findOne({where:{loan_conf_id:loan_config_id}, include:{model:Items,as:"items"}})
+   const loanConf=await LoanConfig.findOne({where:{loan_conf_id:loan_conf_id}, include:{model:Items,as:"items"}})
    if (item && loanConf) {
     const principal = (parseInt(item.loan_limit)/100)*parseInt(item.item_price)
     const interestRate=parseFloat(loanConf.interest_rate)/100
