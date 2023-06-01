@@ -55,3 +55,25 @@ try {
     res.status(500).send(error)   
 }
 }
+
+exports.editLoanConfiguration = async (req,res, next)=>{
+    try{
+        const {merchant_id,loan_conf_id, duration,interest_rate}=req.query;
+        const loanConfiguration = await LoanConfiguration.findOne({where:{merchant_id:merchant_id,loan_conf_id:loan_conf_id}})
+        if(loanConfiguration){        
+            res.status(400).json({message:"Not Found"})
+        }else{
+            loanConfiguration.duration=duration;
+            loanConfiguration.interest_rate=interest_rate;
+            loanConfiguration.save();
+            res.status(200).json({loanConfiguration})
+        }
+    }catch(error){
+        console.error(error)
+        res.status(500).json({message:"Internal Server Error"})
+    }
+
+
+
+
+}
