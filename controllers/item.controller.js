@@ -51,6 +51,17 @@ try {
 } catch (error) {console.log("error",error)    
 }
 }
+exports.getAllItemsBySalesId=async(req,res)=>{
+try {
+    const {sales_id}=req.query;
+   const items=await Items.findAll({
+    include:[{model:Sales, as:"sales", where:{sales_id:sales_id}, attributes:["sales_id", "email_address","emailStatus","phone_number","status"], through:{attributes:[]}},{model:LoanConfig, as:"loanConfs", attributes:["interest_rate","duration"], through:{attributes:["totalAmountWithInterest"]}}]}
+   );
+   console.log(items)
+   res.status(200).json(items) 
+} catch (error) {console.log("error",error)    
+}
+}
 exports.getItemsById=async(req,res)=>{
 try {
     const {merchant_id,item_id}=req.query;

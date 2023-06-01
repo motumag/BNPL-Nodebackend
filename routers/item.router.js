@@ -24,7 +24,8 @@ const {
   assignItemsToSalesApprove,
   configureLoanForitem,
   editItemById,
-  editItemStatus
+  editItemStatus,
+  getAllItemsBySalesId
 } = require("../controllers/item.controller");
 // User routes
 
@@ -34,7 +35,8 @@ router.post(
   upload.single("picture"),
   createNewItem
 );
-router.get("/getAll", grantAccess(["merchant", "sales"]), getAllItems);
+router.get("/getAll", grantAccess(["merchant"]), getAllItems);
+router.get("/getAllBySalesId", grantAccess(["merchant", "sales"]), getAllItemsBySalesId);
 router.get("/getById", grantAccess(["merchant", "sales"]), getItemsById);
 router.post("/assigntoSales", grantAccess(["merchant"]), assignItemsToSales);
 router.post("/acceptItem", grantAccess(["sales"]), assignItemsToSalesApprove);
