@@ -36,8 +36,23 @@ const Sales = sequelize.define("sales", {
       defaultValue: "Pending",
     },
   });
-Sales.hasMany(Items,{foreignKey:"sales_id"})
-Items.belongsTo(Items,{foreignKey:"sales_id"})
+
+  Sales.belongsToMany(Items, {
+    through: 'SalesItems',
+    foreignKey: 'sales_id', // replaces `productId`
+    otherKey: 'item_id', // replaces `categoryId`
+    as: 'items' 
+  });
+  Items.belongsToMany(Sales, {
+    through: 'SalesItems',
+    foreignKey: 'item_id', // replaces `categoryId`
+    otherKey: 'sales_id', // replaces `productId`
+    as: 'sales'
+  });
+
+
+// Sales.hasMany(Items,{foreignKey:"sales_id"})
+// Items.belongsToMany(Sales,{foreignKey:"sales_id"})
 Sales.hasOne(SalesKyc,{foreignKey:"sales_id", as:"salesKyc"})
 SalesKyc.belongsTo(Sales,{foreignKey:"sales_id", as:"sales"})
 module.exports=Sales;
