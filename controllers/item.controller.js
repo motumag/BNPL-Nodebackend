@@ -1,5 +1,6 @@
 const Items=require("../models/item.model")
 const LoanConfig=require("../models/LoanConfig.models")
+const ItemsLoan=require("../models/itemsLoan.model")
 exports.createNewItem=async(req,res)=>{  
     try {
     const {item_name,item_code,item_price, item_type, merchant_id,loan_limit}=req.body;
@@ -15,8 +16,10 @@ exports.editItemById=async(req,res)=>{
     try {
         const {item_name,item_code,item_price, item_type, merchant_id,loan_limit,item_id}=req.body;
         const { filename, path: filePath } = req.file;
-        console.log(req.body, req.file)
         const item = await Items.findOne({where: {item_id:item_id}})
+        const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }, include:{LoanConfig, as:"loanConfs"} });
+        console.log(loanItems)
+        console.log(item)
         if (item) {
             item.item_type=item_type;
             item.item_name=item_name;
@@ -69,19 +72,16 @@ try {
     }else{
         items.sales_id=sales_id
         items.itemStatus="Pending"
-        
-        if (items.loanConfs.length > 0) {
-        const principal = (parseInt(items.loan_limit)/100)*parseInt(items.item_price)
-        const interestRate=parseFloat(items.loanConfs[0].interest_rate)/100
-        const loanDuration = parseInt(items.loanConfs[0].duration)
-        const interestAmount = principal*interestRate
-        const totalAmount=principal+interestAmount
-            await items.addLoanConfs(loanConf, {through:{totalAmountWithInterest:totalAmount}});
+        try {
+            await items.save()
+        } catch (error) {
+            console.error(error)
         }
-        items.save()
+        
         res.status(200).json({status:"success"})
     }
 } catch (error) {
+    console.error(error);
     res.status(500).json({message:"Internal Server Error"})
 }
 }

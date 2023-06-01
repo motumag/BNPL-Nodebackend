@@ -51,4 +51,20 @@ const Items = sequelize.define("items", {
     otherKey: 'item_id', // replaces `productId`
     as: 'items'
   });
+
+  Items.addHook('afterUpdate', async (items) => {
+    const loanItems = await ItemsLoan.findAll({ where: { item_id: items.item_id }, include:{LoanConf, as:"loanConfs"} });
+  
+    for (const loanItem of loanItems) {
+        const principal = (parseInt(items.loan_limit)/100)*parseInt(items.item_price)
+        const interestRate=parseFloat(loanItem.loanConfs.interest_rate)/100
+        const loanDuration = parseInt(loanItem.loanConfs.duration)
+        const interestAmount = principal*interestRate
+        const totalAmount=principal+interestAmount
+      loanItem.totalAmountWithInterest = totalAmount; // Update the quantity based on the edited item
+      await loanItem.save();
+    }
+  });
+
+
 module.exports=Items;
