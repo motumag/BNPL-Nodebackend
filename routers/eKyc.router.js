@@ -5,7 +5,7 @@ const path = require("path");
 const {grantAccess} = require('../middlewares/userVerification');  
 // API endpoint to handle image uploads
 const {
-    createNewEkyc,createNewEkycDuplicate
+    createNewEkyc,getMerchantKyc
 }=require('../controllers/eKyc.controller'); 
 const merchantUpload = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -27,4 +27,5 @@ router.post("/create", grantAccess(['merchant']),  uploadArray.fields([{
     name:'valid_identification',
     maxCount: 1
 }]), createNewEkyc);
+router.get("/getKyc", grantAccess(['merchant']), getMerchantKyc)
 module.exports = router;

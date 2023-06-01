@@ -19,4 +19,6 @@ const ItemsLoan  = sequelize.define("items_loan", {
     allowNull: true,
   }
   });
+
+
 module.exports=ItemsLoan;

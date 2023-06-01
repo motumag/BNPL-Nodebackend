@@ -7,7 +7,7 @@ const {grantAccess} = require('../middlewares/userVerification');
 const {
     getAllSales,
     loginSales,
-    registerSales,getSalesById,sendRequestForApproval,getAllSalesKyc
+    registerSales,getSalesById,sendRequestForApproval,getAllSalesKyc,approveSalesKyc
 } = require('../controllers/sales.controller');
 
 // User routes
@@ -30,8 +30,9 @@ router.post('/register', grantAccess(['merchant']), registerSales);
 router.post('/login', loginSales);
 router.get('/getAll', grantAccess(['merchant', 'sales']), getAllSales);
 router.get('/getById', grantAccess(['merchant']), getSalesById);
-router.post('/kycRequest', grantAccess(['sales']),upload.single('valid_identification'), sendRequestForApproval);
+router.post('/kycRequest', grantAccess(['sales']),upload.single('picture'), sendRequestForApproval);
 router.get('/getAllKyc', grantAccess(['merchant']), getAllSalesKyc);
+router.post('/approveKyc', grantAccess(['merchant']), approveSalesKyc);
 
 
 module.exports = router;

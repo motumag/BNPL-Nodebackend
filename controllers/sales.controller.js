@@ -195,13 +195,18 @@ exports.getAllSalesKyc = async (req, res, next) => {
 };
 exports.approveSalesKyc= async (req,res,next)=>{
   try {
-    const {kyc_id}=req.body;
-    const salesKyc = await SalesKyc.findOne({where:{sales_id}});
+    const {sales_kyc_id,merchant_id}=req.body;
+    const salesKyc = await SalesKyc.findOne({where:{kyc_id:sales_kyc_id}, include:{model:Sales, as:"sales", where:{merchant_id:merchant_id}}});
     if (!salesKyc) {
       return res.status(400).json({ message: 'Sales Kyc Not Found' });
     }else{
-      await salesKyc.update({status:"Approved"});
-      res.status(200).json({ message: 'Sales Kyc Approved' });
+      if (salesKyc.status=="Approved") {
+        res.status(200).json({ message: 'already approved'});
+      }else{
+        await salesKyc.update({status:"Approved"});
+        res.status(200).json({ message: 'Sales Kyc Approved' });
+      }
+      
     }
   } catch (error) {
     console.error(error);
