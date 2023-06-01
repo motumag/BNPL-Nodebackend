@@ -16,7 +16,6 @@ exports.createNewItem=async(req,res)=>{
 exports.editItemById=async(req,res)=>{  
     try {
         const {item_name,item_code,item_price, item_type, merchant_id,loan_limit,item_id}=req.body;
-        const { filename, path: filePath } = req.file;
         const item = await Items.findOne({where: {item_id:item_id},include:{model:LoanConfig, as:"loanConfs"}})
         console.log(item);
         const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }});
@@ -26,18 +25,12 @@ exports.editItemById=async(req,res)=>{
             item.item_name=item_name;
             item.item_price=item_price;
             item.merchant_id=merchant_id;
-            item.item_pic=filename;
             item.loan_limit=loan_limit;
+            if(req.file){
+                const { filename, path: filePath } = req.file;
+                item.item_pic=filename
+            }
             await item.save();
-        for (const loanItem of item.loanConfs) {
-            const principal = (parseInt(item.loan_limit)/100)*parseInt(item.item_price)
-            const interestRate=parseFloat(loanItem.interest_rate)/100
-            const loanDuration = parseInt(loanItem.duration)
-            const interestAmount = principal*interestRate
-            const totalAmount=principal+interestAmount
-            loanItems.totalAmountWithInterest = totalAmount; // Update the quantity based on the edited item
-            await loanItems.save();
-        }
             res.status(201).json({ item: item, message:"updated" });
         }else{
             res.status(400).json({message:"Item not found"})
@@ -130,4 +123,22 @@ try {
     console.error(error)
     res.status(500).json({message:"Internal Server Error"})
 }
+}
+
+exports.editItemStatus=async (req, res, next)=>{
+    try{
+        const {item_id, merchant_id, status}=req.body;
+        const item = await Items.findOne({where:{item_id:item_id, merchant_id:merchant_id}})
+        if(!item){
+            return res.status(400).json({message:"Not Found"})
+        }else{
+            item.status=status;
+            await item.save()
+            return res.status(201).json({message:"updated"})
+        }
+    }catch(error){
+        console.error(error)
+        return res.status(500).json({message:"Internal Server Error"})
+
+    }
 }

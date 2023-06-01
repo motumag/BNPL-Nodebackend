@@ -23,7 +23,8 @@ const {
   assignItemsToSales,
   assignItemsToSalesApprove,
   configureLoanForitem,
-  editItemById
+  editItemById,
+  editItemStatus
 } = require("../controllers/item.controller");
 // User routes
 
@@ -43,4 +44,5 @@ router.post(
   configureLoanForitem
 );
 router.put("/editItem", grantAccess(["merchant"]), upload.single("picture"),editItemById);
+router.put("/editItemStatus", grantAccess(["merchant"]),editItemStatus);
 module.exports = router;
