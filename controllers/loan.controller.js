@@ -58,9 +58,10 @@ try {
 
 exports.editLoanConfiguration = async (req,res, next)=>{
     try{
-        const {merchant_id,loan_conf_id, duration,interest_rate}=req.query;
+        const {merchant_id,loan_conf_id, duration,interest_rate}=req.body;
         const loanConfiguration = await LoanConfiguration.findOne({where:{merchant_id:merchant_id,loan_conf_id:loan_conf_id}})
-        if(loanConfiguration){        
+        console.log(loanConfiguration)
+        if(!loanConfiguration){        
             res.status(400).json({message:"Not Found"})
         }else{
             loanConfiguration.duration=duration;
