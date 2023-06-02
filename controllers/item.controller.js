@@ -44,7 +44,12 @@ exports.getAllItems=async(req,res)=>{
 try {
     const {id}=req.query;
    const items=await Items.findAll({
-    where:{merchant_id:id}, include:[{model:Sales, as:"sales", attributes:["sales_id", "email_address","emailStatus","phone_number","status"], through:{attributes:[]}},{model:LoanConfig, as:"loanConfs", attributes:["interest_rate","duration"], through:{attributes:["totalAmountWithInterest"]}}]}
+    where:{merchant_id:id},
+     include:[{model:Sales, as:"sales", attributes:["sales_id", "email_address","emailStatus","phone_number","status"], 
+     through:{attributes:[]}},
+     {model:LoanConfig, as:"loanConfs", 
+     attributes:["interest_rate","duration"], 
+     through:{attributes:["totalAmountWithInterest"]}}]}
    );
    console.log(items)
    res.status(200).json(items) 
@@ -55,7 +60,13 @@ exports.getAllItemsBySalesId=async(req,res)=>{
 try {
     const {sales_id}=req.query;
    const items=await Items.findAll({
-    include:[{model:Sales, as:"sales", where:{sales_id:sales_id}, attributes:["sales_id", "email_address","emailStatus","phone_number","status"], through:{attributes:[]}},{model:LoanConfig, as:"loanConfs", attributes:["interest_rate","duration"], through:{attributes:["totalAmountWithInterest"]}}]}
+    include:[{model:Sales, as:"sales", 
+    where:{sales_id:sales_id, status:"Approved"}, 
+    attributes:["sales_id", "email_address","emailStatus","phone_number","status"],
+     through:{attributes:[]}},
+     {model:LoanConfig, as:"loanConfs", 
+     attributes:["interest_rate","duration"],
+      through:{attributes:["totalAmountWithInterest"]}}]}
    );
    console.log(items)
    res.status(200).json(items) 

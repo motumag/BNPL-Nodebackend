@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const utils = require("../utils/utils");
 const SalesKyc = require("../models/salesKyc.models");
+const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 exports.getAllSales = async (req, res) => {
   try {
     const { id } = req.query;
@@ -192,7 +193,11 @@ exports.sendRequestForApproval = async (req, res) => {
   try {
     const { first_name, last_name, tin_number, sales_id } = req.body;
     const { filename, path: filePath } = req.file;
-
+    const valid_identification_path = filePath;
+    const valid_identification = valid_identification_path.replace(
+      "uploads\\",
+      ""
+    );
     const sales = await Sales.findOne({ where: { sales_id } });
     const salesKyc = await SalesKyc.findOne({ where: { sales_id } });
     if (!sales) {
@@ -206,7 +211,7 @@ exports.sendRequestForApproval = async (req, res) => {
           first_name,
           last_name,
           tin_number,
-          valid_identification: filename,
+          valid_identification: IMAGE_UPLOAD_BASE_URL+valid_identification,
         });
         res.status(201).json({ message: "Sales Kyc Created" });
       }
@@ -248,6 +253,25 @@ exports.approveSalesKyc = async (req, res, next) => {
         res.status(200).json({ message: "Sales Kyc Approved" });
       }
       
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+exports.rejectSalesKyc = async (req, res, next) => {
+  try {
+    const {sales_kyc_id,merchant_id}=req.body;
+    const salesKyc = await SalesKyc.findOne({where:{kyc_id:sales_kyc_id}, include:{model:Sales, as:"sales", where:{merchant_id:merchant_id}}});
+    if (!salesKyc) {
+      return res.status(400).json({ message: "Sales Kyc Not Found" });
+    }else{
+      if (salesKyc.status=="Rejected") {
+        res.status(200).json({ message: 'already rejected'});
+      } else {
+        await salesKyc.update({ status: "Rejected" });
+        res.status(200).json({ message: "Sales Kyc Rejected" });
+      }    
     }
   } catch (error) {
     console.error(error);

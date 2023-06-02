@@ -24,7 +24,7 @@ const SalesKyc = sequelize.define("sales_kyc", {
   },
   status: {
     type: DataTypes.STRING,
-    enum: ["Pending", "Approved"],
+    enum: ["Pending", "Approved", "Rejected"],
     defaultValue: "Pending",
   },
 });
