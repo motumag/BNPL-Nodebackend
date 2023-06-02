@@ -4,6 +4,7 @@ const Sales = require("../models/sales.model")
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const utils = require("../../utils/utils")
+const usernameVerification = require("../../middlewares/usernameVerification");
 // const {getAllUser,getUserById}=require("../dal/user")
 
 exports.registerMerchant = async (req, res) => {
@@ -15,7 +16,7 @@ exports.registerMerchant = async (req, res) => {
         const isPhone = phoneRegex.test(username);
         // Check if the email is already registered for a manager
         if (isEmail) {
-          const existingUser = await Merchant.findOne({ where: { email_address:username } });
+          const existingUser = await usernameVerification.isEmailExist(username);
           if (existingUser) {
             return res.status(400).json({ message: 'Email already registered for a merchant' });
           }else{
@@ -31,7 +32,7 @@ exports.registerMerchant = async (req, res) => {
   res.status(201).json({ jsontoken });
           }    
         }else if(isPhone){
-          const existingmerchant = await Merchant.findOne({ where: { phone_number:username } });
+          const existingmerchant = await usernameVerification.isPhoneExist(username);
           if (existingmerchant) {
             return res.status(400).json({ message: 'Phone already registered for a user' });
           }else{
@@ -195,7 +196,7 @@ exports.registerSales= async (req, res, next)=>{
     if (!existingMerchant) {
       return res.status(400).json({ message: 'Merchant With This Id Is Not Found' });
     }
-    const sales = await Sales.findOne({where:{email_address:username}});
+    const sales = await usernameVerification.isEmailExist(username);
     if (sales) {
       res.status(409).json({message:"Sales Already exist"})
     }else{
@@ -209,7 +210,7 @@ exports.registerSales= async (req, res, next)=>{
     res.status(201).json({ "status":"success",password });
     }
     }else if(isPhone){
-      const existingmerchant = await Merchant.findByPk(merchant_id);
+      const existingmerchant = await usernameVerification.isPhoneExist(username);
       if (!existingmerchant) {
         return res.status(400).json({ message: 'Merchant Not Found' });
       }
