@@ -7,8 +7,7 @@ const sequelize = new Sequelize({
   database: process.env.DB_NAME || "BNPL",
   username: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD || "nana@123",
-  dialect: "postgres", // Replace with your database dialect (e.g., 'mysql', 'postgres', 'sqlite')
-  // Add any other Sequelize configurations as needed
+  dialect: "postgres",
 });
 
 // Test the database connection
