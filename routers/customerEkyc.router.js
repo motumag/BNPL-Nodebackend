@@ -6,6 +6,7 @@ const { grantAccess } = require("../middlewares/userVerification");
 // API endpoint to handle image uploads
 const {
   CreateCustomerEkyc,
+  getCustomerCreatedBySalesId,
 } = require("../controllers/customer.eky.controller");
 const customerEkycUpload = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -19,7 +20,7 @@ const uploadArray = multer({ storage: customerEkycUpload });
 
 router.post(
   "/create",
-//   grantAccess(["merchant"]),
+  //   grantAccess(["merchant"]),
   uploadArray.fields([
     {
       name: "national_id_doc",
@@ -36,4 +37,5 @@ router.post(
   ]),
   CreateCustomerEkyc
 );
+router.get("/getBysalesId", getCustomerCreatedBySalesId);
 module.exports = router;

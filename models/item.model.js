@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize=require("../configs/db")
 const LoanConf = require("./LoanConfig.models")
-const ItemsLoan = require("./itemsLoan.model")
+// const ItemsLoan = require("./itemsLoan.model")
 const Items = sequelize.define("items", {
     item_id: {
       type: DataTypes.INTEGER,
@@ -44,13 +44,13 @@ const Items = sequelize.define("items", {
   });
 
   Items.belongsToMany(LoanConf, {
-    through: ItemsLoan,
+    through: "items_loan",
     foreignKey: 'item_id', // replaces `productId`
     otherKey: 'loan_conf_id', // replaces `categoryId`
     as: 'loanConfs' 
   });
   LoanConf.belongsToMany(Items, {
-    through: ItemsLoan,
+    through: "items_loan",
     foreignKey: 'loan_conf_id', // replaces `categoryId`
     otherKey: 'item_id', // replaces `productId`
     as: 'items'
