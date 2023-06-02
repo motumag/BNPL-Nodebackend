@@ -16,36 +16,39 @@ exports.registerMerchant = async (req, res) => {
         // Check if the email is already registered for a manager
         if (isEmail) {
           const existingUser = await Merchant.findOne({ where: { email_address:username } });
-        if (existingUser) {
-          return res.status(400).json({ message: 'Email already registered for a merchant' });
-        }
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);   
-        // Create the manager
-        const merchant = await Merchant.create({ email_address:username, password: hashedPassword});
-         const jsontoken = jwt.sign({ id: merchant.merchant_id, email_address:merchant.email_address, role:merchant.role}, process.env.JWT_SECRET, {
-          expiresIn: "24hr",
-        });
-        req.session.jwt = jsontoken
-        utils.sendEmail(merchant.merchant_id,merchant.email_address,"merchant")
-        res.status(201).json({ jsontoken });
-          
+          if (existingUser) {
+            return res.status(400).json({ message: 'Email already registered for a merchant' });
+          }else{
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(password, 10);   
+  // Create the manager
+  const merchant = await Merchant.create({ email_address:username, password: hashedPassword});
+  const jsontoken = jwt.sign({ id: merchant.merchant_id, email_address:merchant.email_address, role:merchant.role}, process.env.JWT_SECRET, {
+    expiresIn: "24hr",
+  });
+  req.session.jwt = jsontoken
+  utils.sendEmail(merchant.merchant_id,merchant.email_address,"merchant")
+  res.status(201).json({ jsontoken });
+          }    
         }else if(isPhone){
           const existingmerchant = await Merchant.findOne({ where: { phone_number:username } });
           if (existingmerchant) {
             return res.status(400).json({ message: 'Phone already registered for a user' });
+          }else{
+              // Hash the password
+              const hashedPassword = await bcrypt.hash(password, 10);   
+              // Create the manager
+              const merchant = await Merchant.create({ phone_number:username, password: hashedPassword});
+              console.log("Merchant",merchant)
+              const jsontoken = jwt.sign({ id: merchant.merchant_id, phone_number:merchant.phone_number, role:merchant.role}, process.env.JWT_SECRET, {
+                expiresIn: "24hr",
+              });
+              req.session.jwt = jsontoken
+              res.status(201).json({ jsontoken });
           }
-          // Hash the password
-          const hashedPassword = await bcrypt.hash(password, 10);   
-          // Create the manager
-          const merchant = await Merchant.create({ phone_number:username, password: hashedPassword});
-          console.log("Merchant",merchant)
-           const jsontoken = jwt.sign({ id: merchant.merchant_id, phone_number:merchant.phone_number, role:merchant.role}, process.env.JWT_SECRET, {
-            expiresIn: "24hr",
-          });
-          req.session.jwt = jsontoken
-        
-          res.status(201).json({ jsontoken });
+          
+        }else{
+          res.status(500).json({ message: 'Invalid'});
         }
       } catch (error) {
         console.error(error);
@@ -159,7 +162,7 @@ exports.loginSales=async (req, res)=>{
           }else{
             const passwordMatch = bcrypt.compare(password,sales.password)
             if (passwordMatch) {
-              const token = jwt.sign({sales_id:sales.user_id, phone_number:sales.phone_number, role:sales.role},process.env.JWT_SECRET,{expiresIn:"24h"})
+              const token = jwt.sign({sales_id:sales.sales_id, phone_number:sales.phone_number, role:sales.role},process.env.JWT_SECRET,{expiresIn:"24h"})
               req.session.jwt=token
               res.status(200).send({token:token})
             }else{
