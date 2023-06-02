@@ -1,7 +1,8 @@
 const LoanProcess = require("../models/loanProcess.model");
 const CustomerInfo = require("../models/customer_eKyc.model");
 const Sales = require("../usermanagement/models/sales.model");
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
+const { extractedToken } = require("../middlewares/extractTokenSales");
 exports.OrderLoanProcess = async (req, res) => {
   try {
     const {
@@ -13,21 +14,15 @@ exports.OrderLoanProcess = async (req, res) => {
       cumulative_interest,
       total_repayment,
     } = req.body;
-
+    //decode the token and extract phoneNumber
     const tokenWithPrefix = req.headers.authorization;
-    const [prefix, token] = tokenWithPrefix.split(" ");
-    const decodedToken = jwt.decode(token);
+    const resultPhone = extractedToken(tokenWithPrefix);
 
-    var phoneNumber = "";
-    if (decodedToken) {
-      phoneNumber = decodedToken.phone_number;
-    }
     //Query here using phoneNumber and get the salesID
     const getSalesId = await Sales.findOne({
-      where: { phone_number: phoneNumber },
+      where: { phone_number: resultPhone },
     });
     const salesId = getSalesId.sales_id;
-    console.log(salesId);
 
     const customerByNationalId = await CustomerInfo.findOne({
       where: { national_id_number: national_id_number },
