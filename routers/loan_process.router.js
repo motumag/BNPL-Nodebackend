@@ -10,11 +10,7 @@ const {
 } = require("../controllers/loan_process.controller");
 // User routes
 
-router.post(
-  "/create",
-  // grantAccess(["merchant"]),
-  OrderLoanProcess
-);
+router.post("/create", grantAccess(["sales"]), OrderLoanProcess);
 router.get(
   "/getCustomerInfoLoanProcess",
   // grantAccess(["merchant"]),

@@ -15,7 +15,7 @@ exports.CreateCustomerEkyc = async (req, res) => {
       national_id_number,
       loan_status,
       pre_loan_record,
-      sales_id,
+      // sales_id,
     } = req.body;
 
     var { national_id_doc, passport, driving_license } = req.files;
@@ -54,7 +54,7 @@ exports.CreateCustomerEkyc = async (req, res) => {
         driving_license: IMAGE_UPLOAD_BASE_URL + driving_license_cleaned_path, // Store the valid_identification file path
         loan_status,
         pre_loan_record,
-        sales_id,
+        // sales_id,
       });
       res.json(newEkyc);
     }

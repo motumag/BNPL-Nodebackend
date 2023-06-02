@@ -51,18 +51,10 @@ const CustomerEyc = sequelize.define("customer_eKyc", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  loan_status: {
-    type: DataTypes.ENUM("None", "underpayment", "paid"),
-    defaultValue: "None",
-  },
-  pre_loan_record: {
-    type: DataTypes.ENUM("Inactive", "Active", "paid"),
-    defaultValue: "Inactive",
-  },
 });
 // Sales.hasMany(CustomerEyc, { foreignKey: "customer_id" });
 // CustomerEyc.belongsTo(Sales, { foreignKey: "customer_id" });
-Sales.hasMany(CustomerEyc, { foreignKey: "sales_id" });
-CustomerEyc.belongsTo(Sales, { foreignKey: "sales_id" }); // Establishing the association: Task belongs to a User
+// Sales.hasMany(CustomerEyc, { foreignKey: "sales_id" });
+// CustomerEyc.belongsTo(Sales, { foreignKey: "sales_id" });
 
 module.exports = CustomerEyc;
