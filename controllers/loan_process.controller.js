@@ -118,7 +118,15 @@ exports.getLoanProcess = async (req, res) => {
         where: { customer_id: customerDetail.customer_id },
         include: {
           model: CustomerInfo,
-          attributes: ["first_name", "email", "phone_number"],
+          attributes: [
+            "first_name",
+            "last_name",
+            "phone_number",
+            "national_id_doc",
+            "national_id_number",
+            "passport",
+            "driving_license",
+          ],
         },
       });
 
