@@ -63,3 +63,22 @@ exports.CreateCustomerEkyc = async (req, res) => {
     res.status(500).json({ error: "Failed to create Customerkyc" });
   }
 };
+exports.getCustomerCreatedBySalesId = async (req, res) => {
+  try {
+    const salesId = req.query.salesId;
+    console.log("The sales Id is:", salesId);
+    const customerDetail = await CustomeEkyc.findAll({
+      where: { sales_id: salesId },
+    });
+    if (customerDetail) {
+      res.status(200).json({ customerDetail });
+    } else {
+      res
+        .status(404)
+        .json({ message: "No customer is found with this salesId" });
+    }
+  } catch (error) {
+    console.log("Customer fetching error: ", error);
+    res.status(500).json({ message: error.message });
+  }
+};
