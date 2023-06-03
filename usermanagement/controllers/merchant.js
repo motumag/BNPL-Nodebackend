@@ -134,9 +134,7 @@ exports.loginMerchant = async (req, res) => {
   }catch(e) {}
 
     
-  }
-  
-   
+  }  
 exports.loginMerchant=async (req, res)=>{
     const {username, password}=req.body
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
