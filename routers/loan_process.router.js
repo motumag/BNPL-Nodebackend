@@ -7,6 +7,7 @@ const { grantAccess } = require("../middlewares/userVerification");
 const {
   OrderLoanProcess,
   getLoanProcess,
+  getItemsLoan
 } = require("../controllers/loan_process.controller");
 // User routes
 
@@ -15,6 +16,11 @@ router.get(
   "/getCustomerInfoLoanProcess",
   // grantAccess(["merchant"]),
   getLoanProcess
+);
+router.get(
+  "/getItemsLoan",
+  // grantAccess(["merchant"]),
+  getItemsLoan
 );
 
 module.exports = router;

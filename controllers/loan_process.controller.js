@@ -1,7 +1,9 @@
 const LoanProcess = require("../models/loanProcess.model");
 const CustomerInfo = require("../models/customer_eKyc.model");
 const Sales = require("../usermanagement/models/sales.model");
-// const jwt = require("jsonwebtoken");
+const ItemsLoan=require("../models/itemsLoan.model");
+const Items = require("../models/item.model");
+const LoanConf=require("../models/LoanConfig.models");
 const { extractedPhoneFromToken } = require("../middlewares/extractTokenSales");
 exports.OrderLoanProcess = async (req, res) => {
   try {
@@ -13,17 +15,27 @@ exports.OrderLoanProcess = async (req, res) => {
       interest_rate,
       cumulative_interest,
       total_repayment,
+      item_loan_id
     } = req.body;
     //decode the token and extract phoneNumber
     const tokenWithPrefix = req.headers.authorization;
-    const resultPhone = extractedPhoneFromToken(tokenWithPrefix);
-
+    const result = extractedPhoneFromToken(tokenWithPrefix);
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    const phoneRegex = /^\d{10}$/;
+    const isEmail = emailRegex.test(result);
+    const isPhone = phoneRegex.test(result);
     //Query here using phoneNumber and get the salesID
-    const getSalesId = await Sales.findOne({
-      where: { phone_number: resultPhone },
-    });
-    const salesId = getSalesId.sales_id;
-
+    var getsalesId="";
+    if (isPhone) {
+      getsalesId = await Sales.findOne({
+        where: { phone_number: result },
+      });
+    }else{
+      getsalesId = await Sales.findOne({
+        where: { email_address: result },
+      });
+    }    
+    const salesId = getsalesId.sales_id;
     const customerByNationalId = await CustomerInfo.findOne({
       where: { national_id_number: national_id_number },
       include: {
@@ -40,7 +52,7 @@ exports.OrderLoanProcess = async (req, res) => {
         ],
       },
     });
-    console.log("Fetched is:", customerByNationalId);
+
     //if it is empty
     if (customerByNationalId) {
       const loanProcesses = customerByNationalId.loan_processes || [];
@@ -67,6 +79,11 @@ exports.OrderLoanProcess = async (req, res) => {
       }
       if (hasCompletedStatus) {
         console.log('There are loans with status "Completed".');
+        const items=await Items.findByPk(items_loan.item_id)
+      const items_loan = await ItemsLoan.findOne({where:{id:item_loan_id}, 
+        model: Items,
+        as: 'items',
+        include:[{model:LoanConf ,as:"loanConfs", through:{attributes:[]}}]});
         const orderLoan = await LoanProcess.create({
           sales_id: salesId,
           customer_id,
@@ -77,25 +94,43 @@ exports.OrderLoanProcess = async (req, res) => {
           interest_rate,
           cumulative_interest,
           total_repayment,
+
         });
+        
+
+        await orderLoan.setItems(items_loan.item_id);
         return res.status(201).json({
           message: "Loan Payment request has succesfully created",
           orderLoan,
         });
       }
-
       // if (!hasNoneStatus && !hasCompletedStatus && !hasUnderpaymentStatus) {
+      const items=await Items.findByPk(item_loan_id)
+      const items_loan = await ItemsLoan.findOne({where:{id:item_loan_id}, 
+        model: Items,
+        as: 'items',
+        include:[{model:LoanConf ,as:"loanConfs", through:{attributes:[]}}]});
+       console.log("Got an Item",items_loan)
+      const interest=items_loan.loanConfs[0].interest_rate;
+      console.log(interest)
+      const loan_amount=parseFloat(items.item_price)*parseFloat(interest/100)
+      console.log(loan_amount)
+      const duration =items_loan.loanConfs[0].duration;
+      const totalAmountWithLoans = items_loan.totalAmountWithInterest
+      const cumulative_interest=parseFloat(totalAmountWithLoans)-(parseFloat(items.item_price)*parseFloat(interest/100))
       const orderLoan = await LoanProcess.create({
         sales_id: salesId,
         customer_id,
         national_id_number,
-        loan_amount,
+        loan_amount:loan_amount,
         loan_purpose,
-        repayment_term,
-        interest_rate,
-        cumulative_interest,
-        total_repayment,
+        repayment_term:duration,
+        interest_rate:interest,
+        cumulative_interest:cumulative_interest,
+        total_repayment:totalAmountWithLoans,
       });
+      await orderLoan.setItems(items_loan.item_id);
+
       return res.status(201).json({
         message: "Loan Order is created for the first time",
         orderLoan,
@@ -108,6 +143,7 @@ exports.OrderLoanProcess = async (req, res) => {
       });
     }
   } catch (error) {
+    console.error(error)
     res.status(500).json({ error: error.message });
   }
 };
@@ -158,3 +194,21 @@ exports.getLoanProcess = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getItemsLoan = async function(req,res){
+  try{
+    const {id} = req.query;
+    const items_loan = await ItemsLoan.findOne({where:{id:id}, 
+      model: Items,
+      as: 'items',
+      include:[{model:LoanConf ,as:"loanConfs", through:{attributes:[]}}]}, {model:Items, as:"items"});
+    if(items_loan){
+      res.status(200).json({items_loan});
+    }else{
+      res.status(404).json({message:"Item not found"});
+    }
+  }catch(error){
+    console.error(error);
+    res.status(500).json({error:error.message});
+  }
+}

@@ -103,7 +103,7 @@ try {
      through:{attributes:[]}},
      {model:LoanConfig, as:"loanConfs", 
      attributes:["interest_rate","duration"], 
-     through:{attributes:["totalAmountWithInterest"]}}]}
+     through:{attributes:["totalAmountWithInterest","id"]}}]}
    );
    console.log(items)
    res.status(200).json(items) 
@@ -162,17 +162,20 @@ try {
 }
 exports.assignItemsToSalesApprove=async(req,res)=>{
 try {
-    console.log(req.body)
+    
     const {item_id,sales_id}=req.body;
-    const items=await Items.findOne({where:{sales_id:sales_id, item_id:item_id,itemStatus:"Pending"}});
+    const items=await Items.findByPk(item_id, {where:{itemStatus:"Available"},include:{model:Sales, as:"sales", where:{sales_id:sales_id}}});
+    console.log("Items",items)
     if(!items){
         res.status(404).json({"message":"No Item Has Been Assigned To You"})
     }else{
+        console.log(items)
         items.itemStatus="Accepted"
         items.save()
         res.status(200).json({status:"success"})
     }
 } catch (error) {
+    console.error(error);
     res.status(500).json({message:"Internal Server Error"})
 }
 }
