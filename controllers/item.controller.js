@@ -68,7 +68,6 @@ try {
      attributes:["interest_rate","duration"],
       through:{attributes:["totalAmountWithInterest"]}}]}
    );
-   console.log(items)
    res.status(200).json(items) 
 } catch (error) {console.log("error",error)    
 }

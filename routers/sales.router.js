@@ -12,8 +12,8 @@ const {
 
 // User routes
 
-    // Set up Multer storage
-    const storage = multer.diskStorage({
+  // Set up Multer storage
+const storage = multer.diskStorage({
         destination: (req, file, cb) => {
         cb(null, 'uploads/salesKyc'); // Set the destination directory for uploaded images
         },
@@ -24,8 +24,6 @@ const {
 
     // Create the Multer upload instance
     const upload = multer({ storage: storage });
-
-
 router.post('/register', grantAccess(['merchant']), registerSales);
 router.post('/login', loginSales);
 router.get('/getAll', grantAccess(['merchant', 'sales']), getAllSales);
@@ -34,6 +32,4 @@ router.post('/kycRequest', grantAccess(['sales']),upload.single('valid_identific
 router.get('/getAllKyc', grantAccess(['merchant']), getAllSalesKyc);
 router.put('/approveKyc', grantAccess(['merchant']), approveSalesKyc);
 router.put('/rejectKyc', grantAccess(['merchant']), rejectSalesKyc);
-
-
 module.exports = router;
