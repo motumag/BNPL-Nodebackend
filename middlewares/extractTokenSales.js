@@ -7,6 +7,7 @@ const extractedPhoneFromToken = (imcommigToken) => {
     phoneNumber = decodedToken.phone_number;
   }
   console.log("Phone number is:", phoneNumber);
+  //return the phone number
   return phoneNumber;
 };
 module.exports = {
