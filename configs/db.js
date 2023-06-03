@@ -1,6 +1,6 @@
-require("dotenv").config(); // Load environment variables from .env file
-const Sequelize = require("sequelize");
-// const { sequelize } = require('./models');
+require("dotenv").config();
+const { Sequelize } = require("sequelize");
+
 const sequelize = new Sequelize({
   host: process.env.DB_HOST || "127.0.0.1",
   port: process.env.DB_PORT || "5432",
@@ -9,7 +9,6 @@ const sequelize = new Sequelize({
   password: process.env.DB_PASSWORD || "nana@123",
   dialect: "postgres",
 });
-
 // Test the database connection
 async function testConnection() {
   try {
@@ -39,7 +38,6 @@ async function testConnection() {
 //   .catch((error) => {
 //     console.error("Unable to create user table : ", error);
 //   });
-
 testConnection();
 
 module.exports = sequelize;
