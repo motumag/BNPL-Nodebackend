@@ -2,7 +2,7 @@ const LoanProcess = require("../models/loanProcess.model");
 const CustomerInfo = require("../models/customer_eKyc.model");
 const Sales = require("../usermanagement/models/sales.model");
 // const jwt = require("jsonwebtoken");
-const { extractedToken } = require("../middlewares/extractTokenSales");
+const { extractedPhoneFromToken } = require("../middlewares/extractTokenSales");
 exports.OrderLoanProcess = async (req, res) => {
   try {
     const {
@@ -16,7 +16,7 @@ exports.OrderLoanProcess = async (req, res) => {
     } = req.body;
     //decode the token and extract phoneNumber
     const tokenWithPrefix = req.headers.authorization;
-    const resultPhone = extractedToken(tokenWithPrefix);
+    const resultPhone = extractedPhoneFromToken(tokenWithPrefix);
 
     //Query here using phoneNumber and get the salesID
     const getSalesId = await Sales.findOne({
