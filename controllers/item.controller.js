@@ -2,6 +2,7 @@ const Items=require("../models/item.model")
 const LoanConfig=require("../models/LoanConfig.models")
 const ItemsLoan=require("../models/itemsLoan.model")
 const Sales = require("../usermanagement/models/sales.model")
+const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 exports.createNewItem=async(req,res)=>{  
     try {
     const {item_name,item_code,item_price, item_type, merchant_id,loan_limit}=req.body;
@@ -16,6 +17,7 @@ exports.createNewItem=async(req,res)=>{
 exports.editItemById=async(req,res)=>{  
     try {
         const {item_name,item_code,item_price, item_type, merchant_id,loan_limit,item_id}=req.body;
+        console.log(req.body)
         const item = await Items.findOne({where: {item_id:item_id},include:{model:LoanConfig, as:"loanConfs"}})
         console.log(item);
         const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }});
@@ -28,10 +30,62 @@ exports.editItemById=async(req,res)=>{
             item.loan_limit=loan_limit;
             if(req.file){
                 const { filename, path: filePath } = req.file;
-                item.item_pic=filename
+                const cleaned_file_path = filePath.replace(
+                    "uploads\\",
+                    ""
+                  );
+                item.item_pic=IMAGE_UPLOAD_BASE_URL+cleaned_file_path
             }
             await item.save();
             res.status(201).json({ item: item, message:"updated" });
+        }else{
+            res.status(400).json({message:"Item not found"})
+        }
+        } catch (error) {
+            console.error(error);
+         res.status(500).json({message:error})
+        }
+}
+exports.editItemUpdateById=async(req,res)=>{  
+    try {
+        const {item_name,item_code,item_price, item_type, merchant_id,loan_limit,item_id}=req.body;
+        const item = await Items.findOne({where: {item_id:item_id},include:{model:LoanConfig, as:"loanConfs"}})
+        const loanItems = await ItemsLoan.findAll({ where: { item_id: item.item_id }});
+        if (item) {
+            item.item_type=item_type;
+            item.item_name=item_name;
+            item.item_price=item_price;
+            item.merchant_id=merchant_id;
+            item.loan_limit=loan_limit;
+            if(req.file){
+                const { filename, path: filePath } = req.file;
+                const cleaned_file_path = filePath.replace(
+                    "uploads\\",
+                    ""
+                  );
+                item.item_pic=IMAGE_UPLOAD_BASE_URL+cleaned_file_path
+            }
+            await item.save();
+            const items = await Items.findOne({where:{item_id:item.item_id}, include:{model:LoanConfig,as:"loanConfs"}})
+            const itemsLoans = await ItemsLoan.findAll({
+                where: { item_id: items.item_id },
+              });
+              console.log("loop Entry")
+              for (const itemLoan of itemsLoans) {
+                console.log("loop")
+                    const principal = (parseInt(items.loan_limit)/100)*parseInt(items.item_price)             
+                    for (const loanConf of items.loanConfs) {                     
+                        const loanDuration = parseInt(loanConf.duration)
+                        const interestRate=parseFloat(loanConf.interest_rate)/100
+                        const interestAmount = principal*interestRate
+                        const totalAmount=principal+interestAmount
+                        itemLoan.totalAmountWithInterest = totalAmount;
+                       await itemLoan.save();
+                    }
+              }
+              const itemResponse = await Items.findOne({where:{item_id:item.item_id}, include:{model:LoanConfig,as:"loanConfs"}})
+
+            return res.status(201).json({ item: itemResponse, message:"updated" });
         }else{
             res.status(400).json({message:"Item not found"})
         }

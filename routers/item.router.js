@@ -25,7 +25,8 @@ const {
   configureLoanForitem,
   editItemById,
   editItemStatus,
-  getAllItemsBySalesId
+  getAllItemsBySalesId,
+  editItemUpdateById
 } = require("../controllers/item.controller");
 // User routes
 
@@ -45,6 +46,7 @@ router.post(
   grantAccess(["merchant"]),
   configureLoanForitem
 );
-router.put("/editItem", grantAccess(["merchant"]), upload.single("picture"),editItemById);
+router.put("/editItem", grantAccess(["merchant"]), upload.single("picture"),editItemUpdateById);
 router.put("/editItemStatus", grantAccess(["merchant"]),editItemStatus);
+// router.put("/editItemUpdate",upload.single("picture"), grantAccess(["merchant"]),editItemUpdateById);
 module.exports = router;
