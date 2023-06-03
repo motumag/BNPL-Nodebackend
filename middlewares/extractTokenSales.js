@@ -2,13 +2,15 @@ const jwt = require("jsonwebtoken");
 const extractedPhoneFromToken = (imcommigToken) => {
   const [prefix, token] = imcommigToken.split(" ");
   const decodedToken = jwt.decode(token);
-  var phoneNumber = "";
   if (decodedToken) {
-    phoneNumber = decodedToken.phone_number;
+    if (decodedToken.phone_number == undefined) {
+      const email = decodedToken.email_address
+      return email
+    }else{
+      const phoneNumber = decodedToken.phone_number;
+      return phoneNumber
+    }
   }
-  console.log("Phone number is:", phoneNumber);
-  //return the phone number
-  return phoneNumber;
 };
 module.exports = {
   extractedPhoneFromToken,
