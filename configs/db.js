@@ -18,7 +18,6 @@ async function testConnection() {
     console.error("Unable to connect to the database:", error);
   }
 }
-
 // sequelize
 //   .sync({ force: true })
 //   .then(() => {
