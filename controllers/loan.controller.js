@@ -1,5 +1,6 @@
 const LoanConfiguration=require("../models/LoanConfig.models")
 const Merchant = require("../usermanagement/models/merchant.model")
+const axios = require("axios")
 exports.createNewLoanConfiguration=async(req,res)=>{
     try {
     const {interest_rate,duration, merchant_id}=req.body;
@@ -73,8 +74,15 @@ exports.editLoanConfiguration = async (req,res, next)=>{
         console.error(error)
         res.status(500).json({message:"Internal Server Error"})
     }
-
-
-
-
+}
+exports.getLoanRequest = async (req,res, next)=>{
+    const {merchant_id}=req.query;
+    try{
+        axios.get(process.env.LOAN_ADMIN_ENDPOINT).then((response)=>{
+            res.status(200).json(response.data)
+        })
+    }catch(error){
+        console.error(error)
+        res.status(500).json({message:"Internal Server Error"})
+    }
 }
