@@ -8,11 +8,11 @@ const Kyc = sequelize.define("merchant_ekyc", {
   },
   first_name: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   last_name: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   business_name: {
     type: DataTypes.STRING,
