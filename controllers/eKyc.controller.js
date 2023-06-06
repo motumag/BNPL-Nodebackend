@@ -4,8 +4,8 @@ const BankAccount = require("../models/bankAccount.models");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 exports.createNewEkyc = async (req, res) => {
   try {
-    console.log("The merchant_id req is: ", req.body.merchant_id);
-    const {
+    // console.log("The merchant_id req is: ", req.body.merchant_id);
+    var {
       first_name,
       last_name,
       business_name,
@@ -19,22 +19,41 @@ exports.createNewEkyc = async (req, res) => {
       merchant_status,
       merchant_id,
     } = req.body;
-    var { agreement_doc, business_license, valid_identification } = req.files;
-    const agreement_doc_path = agreement_doc[0].path;
-    const business_license_path = business_license[0].path;
-    const valid_identification_path = valid_identification[0].path;
-    const agreament_doc_cleaned_path = agreement_doc_path.replace(
+    console.log(req.body)
+    // first_name=first_name||""; 
+    // last_name=last_name||"";
+    // business_name=business_name||"";
+    // business_type=business_type||"";
+    // tin_number=tin_number||"";
+    // business_address=business_address||"";
+    // website_url=website_url||"";
+    // legal_entity_type=legal_entity_type||"";
+    // date_of_establishment=date_of_establishment||"";
+    // compliance_aml=compliance_aml||""
+    // merchant_status=merchant_status||"";
+    var agreament_doc_cleaned_path=""
+    var business_license_cleaned_path=""
+    var valid_identification_cleaned_path=""
+    console.log(req.files)
+    if (!req.files) {
+      console.log("Files")
+      var { agreement_doc, business_license, valid_identification } = req.files;
+      const agreement_doc_path = agreement_doc[0].path;
+      const business_license_path = business_license[0].path;
+      const valid_identification_path = valid_identification[0].path;
+      agreament_doc_cleaned_path = agreement_doc_path.replace(
+      "uploads\\",
+ ""
+    );
+    business_license_cleaned_path = business_license_path.replace(
       "uploads\\",
       ""
     );
-    const business_license_cleaned_path = business_license_path.replace(
+    valid_identification_cleaned_path = valid_identification_path.replace(
       "uploads\\",
       ""
     );
-    const valid_identification_cleaned_path = valid_identification_path.replace(
-      "uploads\\",
-      ""
-    );
+
     //create the ekyc
     const existingKyc = await Ekyc.findOne({
       where: { merchant_id: merchant_id },
@@ -61,8 +80,36 @@ exports.createNewEkyc = async (req, res) => {
         merchant_status,
         merchant_id: merchant_id,
       });
-      res.status(200).json(newEkyc);
+      return res.status(200).json(newEkyc);
     }
+    }else{
+      //create the ekyc
+    const existingKyc = await Ekyc.findOne({
+      where: { merchant_id: merchant_id },
+    });
+    if (existingKyc) {
+      return res.status(409).json({ error: "Ekyc already exists" });
+    } else {
+      const newEkyc = await Ekyc.create({
+        first_name,
+        last_name,
+        business_name,
+        business_type,
+        tin_number,
+        business_address,
+        website_url,
+        legal_entity_type,
+        date_of_establishment,
+        compliance_aml,
+       // Store the valid_identification file path
+        merchant_status,
+        merchant_id: merchant_id,
+      });
+      return res.status(200).json(newEkyc);
+    }
+    }
+    
+    
   } catch (error) {
     console.error("Error creating business:", error);
     res.status(500).json({ error: "Failed to create business" });

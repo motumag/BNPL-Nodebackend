@@ -4,7 +4,10 @@ const Sales = require("../usermanagement/models/sales.model");
 const ItemsLoan=require("../models/itemsLoan.model");
 const Items = require("../models/item.model");
 const LoanConf=require("../models/LoanConfig.models");
+const CustLoanReq = require("../models/customerLoan.models");
+const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 const { extractedPhoneFromToken } = require("../middlewares/extractTokenSales");
+const LoanAgreement=require("../middlewares/generateLoanAgreement")
 exports.OrderLoanProcess = async (req, res) => {
   try {
     const {
@@ -211,4 +214,58 @@ exports.getItemsLoan = async function(req,res){
     console.error(error);
     res.status(500).json({error:error.message});
   }
+}
+exports.createLoanRequest = async (req,res, next)=>{
+  const {sales_id,item_id, national_id, first_name, middle_name , last_name, phone_number, interest_rate, duration}=req.body
+  try {
+      const sales = await Sales.findByPk(sales_id);
+      const items = await Items.findByPk(item_id);
+      var profile_picture=""
+      if(req.file){
+        const { filename, path: filePath } = req.file;
+        const cleaned_file_path = filePath.replace(
+            "uploads\\",
+            ""
+          );
+        profile_picture=IMAGE_UPLOAD_BASE_URL+cleaned_file_path
+    }
+      const customer_loan_request=await CustLoanReq.create({national_id, first_name, last_name, middle_name, phone_number, interest_rate, duration,sales_id:sales.sales_id, item_id:items.item_id,customer_image:profile_picture });
+      
+      return res.status(201).json({message:"Success", data:customer_loan_request})
+  } catch (error) {
+      console.error(error)
+      res.status(500).json({message:"Internal Server Error"})
+  }
+}
+exports.getLoanRequestBySalesId = async (req,res)=>{
+  try{
+    const {sales_id} = req.query;
+    const customer_loan_request = await CustLoanReq.findAll({
+      where:{sales_id:sales_id},
+      include:[{model:Items}],
+    });
+    if(customer_loan_request){
+      return res.status(200).json({customer_loan_request});
+    }else{
+      return res.status(404).json({message:"No loan request found"});
+    }
+  }catch(error){
+    console.error(error);
+    return res.status(500).json({error:error.message});
+  }
+}
+
+exports.generateLoanAgreement = async (req, res)=>{
+ const {loan_request_id,full_name, percent,amount, duration}=req.body;
+ try {
+  const generatePdf = await LoanAgreement.generatePdf(req.body)
+ if (generatePdf) {
+  return res.status(200).json({message:"Successfully generated"})
+ }else{
+return res.status(404).json({message:"No loan agreement found"})
+ }
+ } catch (error) {
+  return res.status(500).json({message:"Internal Server Error"})
+ }
+ 
 }

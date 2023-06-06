@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {grantAccess} = require('../../middlewares/userVerification');
-const {registerMerchant,loginMerchant,registerSales,loginSales,activateAccount}=require("../controllers/merchant")
+const {registerMerchant,loginMerchant,activateAccount,getUserInfo}=require("../controllers/merchant")
 // Import your controllers
 const {
     getAllUser,
@@ -23,4 +23,5 @@ const {
 router.post('/register', registerMerchant);
 router.post('/login', loginMerchant);
 router.get('/activate', activateAccount);
+router.get('/userInfo', getUserInfo);
 module.exports = router;

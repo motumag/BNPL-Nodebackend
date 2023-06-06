@@ -1,6 +1,11 @@
-const LoanConfiguration=require("../models/LoanConfig.models")
+const LoanConfiguration=require("../models/LoanConfig.models");
+const LoanRequest = require("../models/customerLoan.models");
 const Merchant = require("../usermanagement/models/merchant.model")
 const axios = require("axios")
+const CustLoanReq = require("../models/customerLoan.models");
+const Sales = require("../usermanagement/models/sales.model");
+const Items = require(".././models/item.model");
+const generatePdf = require("../middlewares/generateLoanAgreement")
 exports.createNewLoanConfiguration=async(req,res)=>{
     try {
     const {interest_rate,duration, merchant_id}=req.body;
@@ -84,5 +89,13 @@ exports.getLoanRequest = async (req,res, next)=>{
     }catch(error){
         console.error(error)
         res.status(500).json({message:"Internal Server Error"})
+    }
+}
+exports.generateLoanAgreement = async (req,res, next)=>{
+    const {sales_id}=req.body;
+    try {
+        
+    } catch (error) {
+        
     }
 }

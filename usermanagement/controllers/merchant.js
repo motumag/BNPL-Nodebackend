@@ -4,6 +4,7 @@ const Sales = require("../models/sales.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const utils = require("../../utils/utils");
+const axios = require("axios")
 const usernameVerification = require("../../middlewares/usernameVerification");
 // const {getAllUser,getUserById}=require("../dal/user")
 
@@ -288,7 +289,8 @@ exports.registerSales = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);   
     // Create the manager
     const registeredSales=await Sales.create({ email_address:username, password: hashedPassword, merchant_id:existingMerchant.merchant_id});
-    utils.sendEmail(registeredSales.sales_id,registeredSales.email_address)
+    console.log("password",password)
+    utils.sendEmail(registeredSales.sales_id,registeredSales.email_address, password=password)
     res.status(201).json({ "status":"success",password });
     }
     }else if(isPhone){
@@ -300,21 +302,15 @@ exports.registerSales = async (req, res, next) => {
       if (sales) {
         res.status(409).json({ message: "Sales Already exist" });
       } else {
-        // Generate Random Password
-        const password = utils.generateRandomPassword();
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        // Create the manager
-        const registeredSales = await Sales.create({
-          phone_number: username,
-          password: hashedPassword,
-          merchant_id: existingmerchant.merchant_id,
-        });
-        utils.sendMessage(
-          registeredSales.sales_id,
-          registeredSales.phone_number
-        );
-        res.status(201).json({ status: "success", password });
+        // Generate Random Password 
+    const password= utils.generateRandomPassword()
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);   
+    // Create the manager
+    const registeredSales=await Sales.create({ phone_number:username, password: hashedPassword, merchant_id:existingMerchant.merchant_id});
+    console.log(password)
+    utils.sendMessage(registeredSales.sales_id,registeredSales.phone_number, password=password)
+    res.status(201).json({ "status":"success",password });
       }
     }
   } catch (error) {
@@ -349,7 +345,20 @@ exports.activateAccount = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+exports.getUserInfo=async(req,res) => {
+  const {phoneNumber} = req.body
+  try {
+    const userInfo = axios.post(process.env.USER_INFO,{
+      phoneNumber
+    }).then((response)=>{
+      return res.status(200).json(response.data)
+    })
 
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: error.message})
+  }
+}
 exports.getUserById = async (request, response) => {
   // Inside an async function or a route handler
 
