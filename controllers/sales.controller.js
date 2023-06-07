@@ -152,7 +152,8 @@ exports.registerSales = async (req, res, next) => {
         });
         utils.sendEmail(
           registeredSales.sales_id,
-          registeredSales.email_address
+          registeredSales.email_address,
+          password
         );
         res.status(201).json({ status: "success", password });
       }

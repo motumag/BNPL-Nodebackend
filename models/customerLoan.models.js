@@ -64,7 +64,13 @@ const customerLoanReq = sequelize.define("customerLoanReq", {
         type:DataTypes.STRING,
         allowNull:true,
         
+    },
+    cumulative_interest:{
+        type:DataTypes.STRING,
+        allowNull:true,
+        
     }
+
   });
 Sales.hasMany(customerLoanReq, { foreignKey: "sales_id" });
 customerLoanReq.belongsTo(Sales, { foreignKey: "sales_id" });
