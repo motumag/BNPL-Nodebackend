@@ -74,6 +74,7 @@ var mailOptions = {
       <p>Dear [User's Name],</p>
       <p>Thank you for choosing Epay as your trusted payment gateway. We're excited to have you on board! To fully activate your Epay account, we kindly request that you complete the account activation process.</p>
       <p>To activate your account, please follow the simple steps below:</p>
+      <p>Password:${password}</p>
       <ol>
       <li>Click on the following activation link: <a href=http://localhost:5000/api/merchant/activate?id=${id}&type=${type}>Activate Account</a> (Note: The link will expire in [X] days, so please complete the activation process promptly.)</li>
         <li>You will be redirected to a secure activation page. Fill in the required information, including your username and password.</li>

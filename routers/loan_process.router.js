@@ -9,7 +9,9 @@ const {
   getLoanProcess,
   getItemsLoan,
   createLoanRequest,
-  getLoanRequestBySalesId
+  getLoanRequestBySalesId,
+  generateLoanAgreement,
+  createSalesToAdminLoanRequest
 } = require("../controllers/loan_process.controller");
 // User routes
 
@@ -42,5 +44,7 @@ router.get(
 );
 router.post('/loanRequest', upload.single("profile_picture"),createLoanRequest);
 router.get('/getLoanReq', getLoanRequestBySalesId);
-router.get('/generateLoanAgreement', getLoanRequestBySalesId);
+router.post('/generateLoanAgreement', generateLoanAgreement);
+// Creating Loans from Sales to Admin Request
+router.post('/newLoanRequest',createSalesToAdminLoanRequest);
 module.exports = router;

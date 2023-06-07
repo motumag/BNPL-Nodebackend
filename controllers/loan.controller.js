@@ -91,11 +91,5 @@ exports.getLoanRequest = async (req,res, next)=>{
         res.status(500).json({message:"Internal Server Error"})
     }
 }
-exports.generateLoanAgreement = async (req,res, next)=>{
-    const {sales_id}=req.body;
-    try {
-        
-    } catch (error) {
-        
-    }
-}
+
+

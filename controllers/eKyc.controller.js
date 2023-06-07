@@ -35,7 +35,7 @@ exports.createNewEkyc = async (req, res) => {
     var business_license_cleaned_path=""
     var valid_identification_cleaned_path=""
     console.log(req.files)
-    if (!req.files) {
+    if (req.files) {
       console.log("Files")
       var { agreement_doc, business_license, valid_identification } = req.files;
       const agreement_doc_path = agreement_doc[0].path;
@@ -83,32 +83,30 @@ exports.createNewEkyc = async (req, res) => {
       return res.status(200).json(newEkyc);
     }
     }else{
-      //create the ekyc
-    const existingKyc = await Ekyc.findOne({
-      where: { merchant_id: merchant_id },
-    });
-    if (existingKyc) {
-      return res.status(409).json({ error: "Ekyc already exists" });
-    } else {
-      const newEkyc = await Ekyc.create({
-        first_name,
-        last_name,
-        business_name,
-        business_type,
-        tin_number,
-        business_address,
-        website_url,
-        legal_entity_type,
-        date_of_establishment,
-        compliance_aml,
-       // Store the valid_identification file path
-        merchant_status,
-        merchant_id: merchant_id,
+      const existingKyc = await Ekyc.findOne({
+        where: { merchant_id: merchant_id },
       });
-      return res.status(200).json(newEkyc);
+      if (existingKyc) {
+        return res.status(409).json({ error: "Ekyc already exists" });
+      } else {
+        const newEkyc = await Ekyc.create({
+          first_name,
+          last_name,
+          business_name,
+          business_type,
+          tin_number,
+          business_address,
+          website_url,
+          legal_entity_type,
+          date_of_establishment,
+          compliance_aml,
+         // Store the valid_identification file path
+          merchant_status,
+          merchant_id: merchant_id,
+        });
+        return res.status(200).json(newEkyc);
+      }
     }
-    }
-    
     
   } catch (error) {
     console.error("Error creating business:", error);

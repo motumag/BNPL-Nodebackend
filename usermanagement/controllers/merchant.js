@@ -5,7 +5,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const utils = require("../../utils/utils");
 const axios = require("axios")
+const Otp = require("../../models/otp.models");
 const usernameVerification = require("../../middlewares/usernameVerification");
+const http = require("http");
+const { Console } = require("console");
 // const {getAllUser,getUserById}=require("../dal/user")
 
 exports.registerMerchant = async (req, res) => {
@@ -346,18 +349,54 @@ exports.activateAccount = async (req, res) => {
   }
 };
 exports.getUserInfo=async(req,res) => {
-  const {phoneNumber} = req.body
-  try {
-    const userInfo = axios.post(process.env.USER_INFO,{
-      phoneNumber
-    }).then((response)=>{
-      return res.status(200).json(response.data)
-    })
+  // try {
+  // const {phoneNumber} = req.query
+  //   const response = axios.post(process.env.USER_INFO,{
+  //     phoneNumber
+  //   })
+  //   if (response.statusCode === 200) {
+  //   return response.status(200).json(response.data)
+      
+  //   }
 
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({message: error.message})
-  }
+  // } catch (error) {
+  //   console.error(error)
+  //   return res.status(500).json({message: error.message})
+  // }
+
+  const {phoneNumber}=req.query
+  const postData = JSON.stringify({phoneNumber: phoneNumber})
+  const options = {
+    hostname: process.env.HOST_NAME,
+    port: process.env.USER_INFO_PORT, // or the appropriate port number
+    path: "/userInfo?phoneNumber=" + encodeURIComponent(phoneNumber),
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData)
+    }
+  };
+
+  const request=http.request(options, (response)=>{
+    let data=''
+    response.on('data', (chunk)=>{
+      data+=chunk
+    })
+    response.on('end', ()=>{
+      console.log(response.statusCode)
+      if (response.statusCode==404) {
+        res.status(response.statusCode).json(JSON.parse(data))
+      }else{
+        res.status(response.statusCode).json(JSON.parse(data))
+      }
+      console.log("End Of Response", data)
+    })
+  })
+  request.on('error', (error)=>{
+    console.error("Error", error.message)
+  });
+  request.write(postData)
+  request.end()
 }
 exports.getUserById = async (request, response) => {
   // Inside an async function or a route handler
@@ -376,6 +415,40 @@ exports.getUserById = async (request, response) => {
     response.status(500).send("Internal Server Error");
   }
 };
+exports.sendOtp=async(req,res) => {
+  const {Mobile} = req.body
+  const Text="345678"
+  try {
+    var data =""
+    axios.post(process.env.OTP_ENDPOINT,{
+      Mobile,
+      Text
+    }).then((response)=>{
+    
+     const otp=Otp.create({Mobile:Mobile, text:Text})
+     return res.status(200).json(response.data);
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: error.message})
+  }
+}
+
+exports.verifyOtp=async(req,res) => {
+  const {Mobile, Text} = req.body
+  console.log(req.body)
+  try {
+    const verfiyOtp = await Otp.findOne({where:{Mobile:Mobile.toString(), text:Text}})
+    if (verfiyOtp) {
+      res.status(200).send("ok")
+    }else{
+      res.status(404).send("Not Found")
+    }
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: error.message})
+  }
+}
 exports.createAccount = (req, res, next) => {
   const { accountNumber } = req.body;
   const { user_id } = req.user_id;
