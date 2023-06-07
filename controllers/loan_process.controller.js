@@ -216,7 +216,7 @@ exports.getItemsLoan = async function(req,res){
   }
 }
 exports.createLoanRequest = async (req,res, next)=>{
-  const {sales_id,item_id, national_id, first_name, middle_name , last_name, phone_number, interest_rate, duration}=req.body
+  const {sales_id,item_id, national_id, first_name, middle_name , last_name, phone_number, interest_rate, duration, amount,totalAmountWithInterst}=req.body
   try {
       const sales = await Sales.findByPk(sales_id);
       const items = await Items.findByPk(item_id);
@@ -229,7 +229,7 @@ exports.createLoanRequest = async (req,res, next)=>{
           );
         profile_picture=IMAGE_UPLOAD_BASE_URL+cleaned_file_path
     }
-      const customer_loan_request=await CustLoanReq.create({national_id, first_name, last_name, middle_name, phone_number, interest_rate, duration,sales_id:sales.sales_id, item_id:items.item_id,customer_image:profile_picture });
+      const customer_loan_request=await CustLoanReq.create({national_id, first_name, last_name, middle_name, phone_number, interest_rate, duration,sales_id:sales.sales_id, item_id:items.item_id,customer_image:profile_picture, amount,totalAmountWithInterest:totalAmountWithInterst});
       
       return res.status(201).json({message:"Success", data:customer_loan_request})
   } catch (error) {
@@ -255,17 +255,29 @@ exports.getLoanRequestBySalesId = async (req,res)=>{
   }
 }
 
-exports.generateLoanAgreement = async (req, res)=>{
- const {loan_request_id,full_name, percent,amount, duration}=req.body;
- try {
-  const generatePdf = await LoanAgreement.generatePdf(req.body)
- if (generatePdf) {
-  return res.status(200).json({message:"Successfully generated"})
- }else{
-return res.status(404).json({message:"No loan agreement found"})
- }
- } catch (error) {
+exports.generateLoanAgreement = async (req,res, next)=>{
+  const {sales_id,item_id, first_name, last_name, interest_rate, duration, amount,loan_req_id}=req.body;
+  try {
+     const file_path= await LoanAgreement.generatePdf(req.body)
+      console.log(file_path)
+      if (file_path) {
+          console.log(file_path)
+          const loan_request=await CustLoanReq.findOne({where:{loan_req_id:loan_req_id}})
+          if (loan_request) {
+            const removedFilePath = file_path.replace('C:\\Users\\amhire\\Documents\\NodeProject\\BNPL-Nodebackend\\BNPL-Nodebackend\\uploads\\', '');
+
+            loan_request.agreement_doc=IMAGE_UPLOAD_BASE_URL+removedFilePath;
+            await loan_request.save()
+            return res.status(200).json({message:"Success", data:loan_request.agreement_doc})
+          }else{
+            return res.status(404).json({message:"No loan request found"})
+          }
+        
+      }else{
+          return res.status(500).json({message:"Failed"})
+      }
+  } catch (error) {
+  console.error(error)
   return res.status(500).json({message:"Internal Server Error"})
- }
- 
+  }
 }

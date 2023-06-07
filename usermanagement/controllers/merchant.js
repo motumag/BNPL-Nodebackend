@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const utils = require("../../utils/utils");
 const axios = require("axios")
+const Otp = require("../../models/otp.models");
 const usernameVerification = require("../../middlewares/usernameVerification");
 // const {getAllUser,getUserById}=require("../dal/user")
 
@@ -346,7 +347,7 @@ exports.activateAccount = async (req, res) => {
   }
 };
 exports.getUserInfo=async(req,res) => {
-  const {phoneNumber} = req.body
+  const {phoneNumber} = req.query
   try {
     const userInfo = axios.post(process.env.USER_INFO,{
       phoneNumber
@@ -376,6 +377,40 @@ exports.getUserById = async (request, response) => {
     response.status(500).send("Internal Server Error");
   }
 };
+exports.sendOtp=async(req,res) => {
+  const {Mobile} = req.body
+  const Text="345678"
+  try {
+    var data =""
+    axios.post(process.env.OTP_ENDPOINT,{
+      Mobile,
+      Text
+    }).then((response)=>{
+    
+     const otp=Otp.create({Mobile:Mobile, text:Text})
+     return res.status(200).json(response.data);
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: error.message})
+  }
+}
+
+exports.verifyOtp=async(req,res) => {
+  const {Mobile, Text} = req.body
+  console.log(req.body)
+  try {
+    const verfiyOtp = await Otp.findOne({where:{Mobile:Mobile.toString(), text:Text}})
+    if (verfiyOtp) {
+      res.status(200).send("ok")
+    }else{
+      res.status(404).send("Not Found")
+    }
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({message: error.message})
+  }
+}
 exports.createAccount = (req, res, next) => {
   const { accountNumber } = req.body;
   const { user_id } = req.user_id;
