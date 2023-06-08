@@ -497,3 +497,42 @@ exports.createNedajStation = (req, res, next) => {
 exports.getNedajStation = (req, res, next) => {
   res.status(200).send("Set Your Bank Account Primary");
 };
+
+exports.getAllMerchants = async (request, response) => {
+  try {
+    // const user = await getUserById(userId);
+    const all_merchant = await Merchant.findAll();
+
+    if (all_merchant) {
+      response.status(200).send(all_merchant);
+    } else {
+      response.status(400).json("Merchant Not Found");
+    }
+  } catch (error) {
+    console.error(error);
+    response.status(500).send("Internal Server Error");
+  }
+};
+
+exports.getAllMerchantsByPage = async (req, res) => {
+  try {
+    const { count, rows } = await Merchant.findAndCountAll({
+      limit: perPage,
+      offset: (page - 1) * perPage,
+    });
+    console.log("the count is", count);
+
+    const totalPages = Math.ceil(count / perPage);
+    console.log("Total page", totalPages);
+    res.json({
+      users: rows,
+      page,
+      perPage,
+      totalCount: count,
+      totalPages,
+    });
+  } catch (error) {
+    console.error("Error fetching merchants:", error);
+    res.status(500).json({ error: "Error fetching merchants" });
+  }
+};
