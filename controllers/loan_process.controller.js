@@ -11,8 +11,6 @@ const http = require("http");
 const LoanAgreement = require("../middlewares/generateLoanAgreement");
 const Merchant = require("../usermanagement/models/merchant.model");
 const MerchantEkyc = require("../models/eKyc.model");
-const { resolve } = require("path");
-const { rejects } = require("assert");
 exports.OrderLoanProcess = async (req, res) => {
   try {
     const {
@@ -211,7 +209,6 @@ exports.getLoanProcess = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 exports.getItemsLoan = async function (req, res) {
   try {
     const { id } = req.query;
@@ -303,7 +300,6 @@ exports.getLoanRequestBySalesId = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
 exports.generateLoanAgreement = async (req, res, next) => {
   const {
     sales_id,
