@@ -15,7 +15,12 @@ const {
   // Set up Multer storage
 const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-        cb(null, 'uploads/salesKyc'); // Set the destination directory for uploaded images
+          const directory = "uploads/salesKyc";
+
+          // Create the directory if it doesn't exist
+          fs.mkdirSync(directory, { recursive: true });
+          cb(null, directory);
+        cb(null, directory); // Set the destination directory for uploaded images
         },
         filename: (req, file, cb) => {
         cb(null, file.originalname); // Use the original filename
