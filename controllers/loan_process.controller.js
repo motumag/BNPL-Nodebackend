@@ -397,7 +397,8 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
       const { filename, path: filePath } = req.file;
 
       const cleaned_file_path = filePath.replace("uploads\\", "");
-      const signed_agreement_doc = IMAGE_UPLOAD_BASE_URL + cleaned_file_path;
+      const signed_agreement_doc =
+        IMAGE_UPLOAD_BASE_URL + "signedAgreementDoc/" + cleaned_file_path;
       console.log(signed_agreement_doc);
       const customer_loan_req = await CustLoanReq.findByPk(loan_req_id);
       const merchantEkyc = await MerchantEkyc.findOne({
