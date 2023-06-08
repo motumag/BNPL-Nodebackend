@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
+const fs = require("fs");
 const router = express.Router();
 const path = require("path");
 const { grantAccess } = require("../middlewares/userVerification");
@@ -10,15 +11,13 @@ const {
   getMerchantKyc,
   createBankAccount,
   getMerchantAccountNumber,
+  getAllMerchantEkyc,
+  approveMerchantsByAdmin,
   getAllMerchantKyc,
 } = require("../controllers/eKyc.controller");
 const merchantUpload = multer.diskStorage({
   destination: (req, file, cb) => {
-    const directory = "uploads/merchantKyc";
-
-    // Create the directory if it doesn't exist
-    fs.mkdirSync(directory, { recursive: true });
-    cb(null, directory); // Set the destination directory for uploaded images
+    cb(null, "uploads/merchantKyc"); // Set the destination directory for uploaded images
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname); // Use the original filename
@@ -50,4 +49,6 @@ router.get("/getKyc", grantAccess(["merchant"]), getMerchantKyc);
 router.get("/getAll", getAllMerchantKyc);
 router.post("/account", grantAccess(["merchant"]), createBankAccount);
 router.get("/account", grantAccess(["merchant"]), getMerchantAccountNumber);
+router.get("/merchant", getAllMerchantEkyc);
+router.post("/approve-merchant", approveMerchantsByAdmin);
 module.exports = router;

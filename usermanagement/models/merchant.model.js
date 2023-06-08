@@ -29,8 +29,8 @@ const Merchant = sequelize.define("merchants", {
   },
   role: {
     type: DataTypes.STRING,
+    enum: ["merchant", "Admin", "supperAdmin"],
     defaultValue: "merchant",
-    allowNull: false,
   },
 });
 Merchant.hasMany(Sales, { foreignKey: "merchant_id" });
@@ -39,6 +39,6 @@ Merchant.hasMany(Items, { foreignKey: "merchant_id" });
 Items.belongsTo(Merchant, { foreignKey: "merchant_id" });
 Merchant.hasMany(LoanConf, { foreignKey: "merchant_id" });
 LoanConf.belongsTo(Merchant, { foreignKey: "merchant_id" });
-Merchant.hasOne(kyc,{foreignKey:"merchant_id", as:"merchantKyc"})
-kyc.belongsTo(Merchant,{foreignKey:"merchant_id", as:"merchantkyc"})
+Merchant.hasOne(kyc, { foreignKey: "merchant_id", as: "merchantKyc" });
+kyc.belongsTo(Merchant, { foreignKey: "merchant_id", as: "merchantkyc" });
 module.exports = Merchant;
