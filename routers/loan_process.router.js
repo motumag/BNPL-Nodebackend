@@ -18,7 +18,11 @@ const {
 // Set up Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Set the destination directory for uploaded images
+    const directory = "uploads/";
+
+    // Create the directory if it doesn't exist
+    fs.mkdirSync(directory, { recursive: true });
+    cb(null, directory); // Set the destination directory for uploaded images
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname); // Use the original filename
@@ -27,7 +31,12 @@ const storage = multer.diskStorage({
 const pdfStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Define the destination directory for uploaded files
-    cb(null, "uploads/signedAgreementDoc");
+    const directory = "uploads/signedAgreementDoc";
+
+    // Create the directory if it doesn't exist
+    fs.mkdirSync(directory, { recursive: true });
+    cb(null, directory);
+    
   },
   filename: function (req, file, cb) {
     // Define the filename for uploaded files
