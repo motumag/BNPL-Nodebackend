@@ -346,7 +346,8 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
   const { sales_id, merchant_id, item_id, loan_purpose, loan_req_id } =
     req.body;
 
-  const sendLoanRequest = (postData) => {
+  const sendLoanRequest = (postData, signed_agreement_doc) => {
+    console.log(signed_agreement_doc);
     return new Promise((resolve, reject) => {
       const options = {
         hostname: process.env.LOAN_SPRING_BACKEND_HOST,
@@ -370,6 +371,7 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
             const loanRequestStatus = await CustLoanReq.findByPk(loan_req_id);
             if (loanRequestStatus.status === "Available") {
               loanRequestStatus.status = "Pending";
+              loanRequestStatus.signed_agreement_doc = signed_agreement_doc;
               await loanRequestStatus.save();
             }
             resolve({ statusCode: response.statusCode, message: "Success" });
@@ -389,42 +391,52 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
   };
   try {
     // const sales= await Sales.findOne({where:{sales_id:sales_id}, include:{model:Merchant}})
-    const customer_loan_req = await CustLoanReq.findByPk(loan_req_id);
-    const merchantEkyc = await MerchantEkyc.findOne({
-      where: { merchant_id: merchant_id },
-    });
-    const cumulative_interest =
-      parseFloat(customer_loan_req.totalAmountWithInterest) -
-      parseFloat(customer_loan_req.amount);
-    const loan_request_payload = {
-      sales_id: sales_id,
-      merchant_id: merchant_id,
-      item_id: item_id,
-      loan_amount: customer_loan_req.amount,
-      loan_purpose,
-      repayment_term: customer_loan_req.duration,
-      interest_rate: customer_loan_req.interest_rate,
-      cumulative_interest: cumulative_interest,
-      total_repayment: customer_loan_req.totalAmountWithInterest,
-      merchant_valid_identification: merchantEkyc.valid_identification,
-      merchant_bussiness_license: merchantEkyc.business_licnense,
-      merchant_agreement_doc: merchantEkyc.agreement_doc,
-      customer_national_id: customer_loan_req.national_id,
-      customer_full_name:
-        customer_loan_req.first_name +
-        " " +
-        customer_loan_req.middle_name +
-        " " +
-        customer_loan_req.last_name,
-      phone_number: customer_loan_req.phone_number,
-      customer_image: customer_loan_req.customer_image,
-      customer_agreement_doc: customer_loan_req.agreement_doc,
-    };
-    console.log(loan_request_payload);
-    const postData = JSON.stringify(loan_request_payload);
-    const loanResponse = await sendLoanRequest(postData);
-    res.status(loanResponse.statusCode).json({ message: loanResponse.message });
+    if (!req.file) {
+      return res.status(400).json({ message: "Bad Request" });
+    } else {
+      const { filename, path: filePath } = req.file;
+
+      const cleaned_file_path = filePath.replace("uploads\\", "");
+      const signed_agreement_doc = IMAGE_UPLOAD_BASE_URL + cleaned_file_path;
+      console.log(signed_agreement_doc);
+      const customer_loan_req = await CustLoanReq.findByPk(loan_req_id);
+      const merchantEkyc = await MerchantEkyc.findOne({
+        where: { merchant_id: merchant_id },
+      });
+      const loan_request_payload = {
+        sales_id: sales_id,
+        merchant_id: merchant_id,
+        item_id: customer_loan_req.item_id,
+        loan_amount: customer_loan_req.amount,
+        loan_purpose,
+        repayment_term: customer_loan_req.duration,
+        interest_rate: customer_loan_req.interest_rate,
+        merchant_valid_identification: merchantEkyc.valid_identification,
+        merchant_bussiness_license: merchantEkyc.business_licnense,
+        merchant_agreement_doc: merchantEkyc.agreement_doc,
+        customer_national_id: customer_loan_req.national_id,
+        customer_full_name:
+          customer_loan_req.first_name +
+          " " +
+          customer_loan_req.middle_name +
+          " " +
+          customer_loan_req.last_name,
+        phone_number: customer_loan_req.phone_number,
+        customer_image: customer_loan_req.customer_image,
+        customer_agreement_doc: signed_agreement_doc,
+      };
+      console.log(loan_request_payload);
+      const postData = JSON.stringify(loan_request_payload);
+      const loanResponse = await sendLoanRequest(
+        postData,
+        signed_agreement_doc
+      );
+      res
+        .status(loanResponse.statusCode)
+        .json({ message: loanResponse.message });
+    }
   } catch (error) {
-    res.status(error.statusCode).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
