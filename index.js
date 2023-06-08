@@ -33,6 +33,6 @@ app.use("/api/agreement", pdfRoutes);
 app.use("/api/customer-ekyc", customeEkycRouter);
 app.use("/api/loanprocess", loanProcessRouter);
 const PORT = process.env.PORT;
-app.listen(5000, () => {
+app.listen(PORT, () => {
   console.info(`Running On Port 5000`);
 });
