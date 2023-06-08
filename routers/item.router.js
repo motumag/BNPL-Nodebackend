@@ -1,12 +1,18 @@
 const express = require("express");
 const multer = require("multer");
+const fs = require('fs');
 const router = express.Router();
 const { grantAccess } = require("../middlewares/userVerification");
 
 // Set up Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Set the destination directory for uploaded images
+    const directory = "uploads/";
+
+    // Create the directory if it doesn't exist
+    fs.mkdirSync(directory, { recursive: true });
+    cb(null, directory); 
+    // cb(null, "uploads/"); // Set the destination directory for uploaded images
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname); // Use the original filename
