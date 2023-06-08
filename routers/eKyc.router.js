@@ -1,5 +1,6 @@
 const express = require("express");
 const multer = require("multer");
+const fs = require('fs');
 const router = express.Router();
 const path = require("path");
 const { grantAccess } = require("../middlewares/userVerification");
