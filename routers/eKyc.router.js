@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const fs = require('fs');
+const fs = require("fs");
 const router = express.Router();
 const path = require("path");
 const { grantAccess } = require("../middlewares/userVerification");
@@ -10,6 +10,7 @@ const {
   getMerchantKyc,
   createBankAccount,
   getMerchantAccountNumber,
+  getAllMerchantKyc,
 } = require("../controllers/eKyc.controller");
 const merchantUpload = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -46,6 +47,7 @@ router.post(
   createNewEkyc
 );
 router.get("/getKyc", grantAccess(["merchant"]), getMerchantKyc);
+router.get("/getAll", getAllMerchantKyc);
 router.post("/account", grantAccess(["merchant"]), createBankAccount);
 router.get("/account", grantAccess(["merchant"]), getMerchantAccountNumber);
 module.exports = router;

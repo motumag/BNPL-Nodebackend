@@ -16,7 +16,6 @@ exports.createNewEkyc = async (req, res) => {
       legal_entity_type,
       date_of_establishment,
       compliance_aml,
-      merchant_status,
       merchant_id,
     } = req.body;
     console.log(req.body);
@@ -83,7 +82,7 @@ exports.createNewEkyc = async (req, res) => {
             IMAGE_UPLOAD_BASE_URL +
             "merchantKyc/" +
             valid_identification_cleaned_path, // Store the valid_identification file path
-          merchant_status,
+          
           merchant_id: merchant_id,
         });
         return res.status(200).json(newEkyc);
@@ -107,7 +106,7 @@ exports.createNewEkyc = async (req, res) => {
           date_of_establishment,
           compliance_aml,
           // Store the valid_identification file path
-          merchant_status,
+          // merchant_status,
           merchant_id: merchant_id,
         });
         return res.status(200).json(newEkyc);
@@ -125,6 +124,16 @@ exports.getMerchantKyc = async function (req, res, next) {
   const merchant_kyc = await Ekyc.findOne({
     where: { merchant_id: merchant_id },
   });
+  if (merchant_kyc) {
+    res.status(200).json(merchant_kyc);
+  } else {
+    res.status(400).json({ message: "Not Found" });
+  }
+};
+exports.getAllMerchantKyc = async function (req, res, next) {
+  // console.log("The incomming req is: ", inc.compliance_aml);
+  
+  const merchant_kyc = await Ekyc.findAll({});
   if (merchant_kyc) {
     res.status(200).json(merchant_kyc);
   } else {

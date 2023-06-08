@@ -382,9 +382,10 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
       });
 
       request.on("error", (error) => {
-        console.error("Error", error.message);
+        console.error("Error", error);
         res.status(400).json({ message: "Bad Request" });
       });
+      console.log(postData);
       request.write(postData);
       request.end();
     });
@@ -407,14 +408,16 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
       const loan_request_payload = {
         sales_id: sales_id,
         merchant_id: merchant_id,
-        item_id: customer_loan_req.item_id,
+        item_id: customer_loan_req.item_id.toString(),
         loan_amount: customer_loan_req.amount,
         loan_purpose,
+        loan_req_id,
         repayment_term: customer_loan_req.duration,
         interest_rate: customer_loan_req.interest_rate,
         merchant_valid_identification: merchantEkyc.valid_identification,
         merchant_bussiness_license: merchantEkyc.business_licnense,
         merchant_agreement_doc: merchantEkyc.agreement_doc,
+        merchant_business_license: merchantEkyc.business_licnense,
         customer_national_id: customer_loan_req.national_id,
         customer_full_name:
           customer_loan_req.first_name +
