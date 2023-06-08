@@ -18,15 +18,15 @@ async function testConnection() {
     console.error("Unable to connect to the database:", error);
   }
 }
-sequelize
-  .sync({ force: true })
-  .then(() => {
-    console.log("Drop and Re sync the database!");
-    // initial();
-  })
-  .catch((error) => {
-    console.error("Unable to create user table : ", error);
-  });
+// sequelize
+//   .sync({ force: true })
+//   .then(() => {
+//     console.log("Drop and Re sync the database!");
+//     // initial();
+//   })
+//   .catch((error) => {
+//     console.error("Unable to create user table : ", error);
+//   });
 
 // sequelize
 //   .sync({ alter: true })
