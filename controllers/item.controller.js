@@ -2,10 +2,6 @@ const Items = require("../models/item.model");
 const LoanConfig = require("../models/LoanConfig.models");
 const ItemsLoan = require("../models/itemsLoan.model");
 const Sales = require("../usermanagement/models/sales.model");
-const Items = require("../models/item.model");
-const LoanConfig = require("../models/LoanConfig.models");
-const ItemsLoan = require("../models/itemsLoan.model");
-const Sales = require("../usermanagement/models/sales.model");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 exports.createNewItem = async (req, res) => {
   try {
