@@ -32,6 +32,12 @@ const {
   editItemStatus,
   getAllItemsBySalesId,
   editItemUpdateById,
+  createItemCategory,
+  assignItemToCategory,
+  deleteCategory,
+  editCategory,
+  getAllCategory,
+  getCategoryById,
 } = require("../controllers/item.controller");
 // User routes
 
@@ -62,5 +68,19 @@ router.put(
   editItemUpdateById
 );
 router.put("/editItemStatus", grantAccess(["merchant"]), editItemStatus);
-// router.put("/editItemUpdate",upload.single("picture"), grantAccess(["merchant"]),editItemUpdateById);
+router.post(
+  "/createItemCategory",
+  grantAccess(["merchant"]),
+  createItemCategory
+);
+router.post(
+  "/assignItemToCategory",
+  grantAccess(["merchant"]),
+  assignItemToCategory
+);
+router.get("/getAllCategories", grantAccess(["merchant"], getAllCategory));
+router.get("/getCategoryById", grantAccess(["merchant"], getCategoryById));
+router.put("/editCategory", grantAccess(["merchant"], editCategory));
+router.delete("/deleteCategory", grantAccess(["merchant"], deleteCategory));
+
 module.exports = router;
