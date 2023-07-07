@@ -83,7 +83,7 @@ exports.createNewEkyc = async (req, res) => {
             IMAGE_UPLOAD_BASE_URL +
             "merchantKyc/" +
             valid_identification_cleaned_path, // Store the valid_identification file path
-          
+
           merchant_id: merchant_id,
         });
         return res.status(200).json(newEkyc);
