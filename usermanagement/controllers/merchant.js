@@ -12,6 +12,10 @@ const http = require("http");
 const { Console } = require("console");
 const { v4: uuidv4 } = require("uuid");
 
+const {
+  requestPasswordReset,
+  resetPassword,
+} = require("../../middlewares/passwordReset");
 // const {getAllUser,getUserById}=require("../dal/user")
 
 exports.registerMerchant = async (req, res) => {
@@ -71,59 +75,6 @@ exports.registerMerchant = async (req, res) => {
     res.status(500).json({ message: "Merchant registration failed" });
   }
 };
-// exports.loginMerchant = async (req, res) => {
-//   const { username, password } = req.body;
-//   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-//   const phoneRegex = /^\d{10}$/;
-//   const isEmail = emailRegex.test(username);
-//   const isPhone = phoneRegex.test(username);
-//   try {
-//     if (isEmail) {
-//       const existingmerchant = await usernameVerification.isEmailExist(username);
-//       if (existingmerchant) {
-//         if (merchant.emailStatus=='Pending') {
-//           res.status(403).json({ message: "In active Account" });
-//         }else if (merchant.emailStatus=="Inactive"){
-//           res.status(403).json({ message: "Account Is InActive" });
-//         }else{
-//               // Hash the password
-//               const hashedPassword = await bcrypt.hash(password, 10);
-//               // Create the manager
-//               const merchant = await Merchant.create({ email_address:username, password: hashedPassword});
-//               const jsontoken = jwt.sign({ id: merchant.merchant_id, email_address:merchant.email_address, role:merchant.role}, process.env.JWT_SECRET, {
-//                 expiresIn: "24hr",
-//               });
-//               req.session.jwt = jsontoken
-//               utils.sendEmail(merchant.merchant_id,merchant.email_address,"merchant")
-//               res.status(201).json({ jsontoken });
-//         }
-//         }else{
-//           res.status(404).json({ message: "Merchant not found" });
-//         }
-//       }else if(isPhone){
-//       const existingmerchant = await usernameVerification.isPhoneExist(username);
-//       if (existingmerchant) {
-//         return res.status(400).json({ message: 'Phone already registered for a user' });
-//       }else{
-//           // Hash the password
-//           const hashedPassword = await bcrypt.hash(password, 10);
-//           // Create the manager
-//           const merchant = await Merchant.create({ phone_number:username, password: hashedPassword});
-//           const createdMerchan = await Merchant.create({ phone_number:username, password: hashedPassword});
-//           console.log("Merchant",merchant)
-//           const jsontoken = jwt.sign({ id: merchant.merchant_id, phone_number:merchant.phone_number, role:merchant.role}, process.env.JWT_SECRET, {
-//             expiresIn: "24hr",
-//           });
-//           req.session.jwt = jsontoken
-//           res.status(201).json({ jsontoken });
-//       }
-
-//     }else{
-//       res.status(500).json({ message: 'Invalid'});
-//     }
-//   }catch(e) {}
-
-//   }
 exports.loginMerchant = async (req, res) => {
   const { username, password } = req.body;
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -528,21 +479,6 @@ exports.getAllAccount = async (req, res, next) => {
   }
   res.status(200).send("Set Your Bank Account Primary");
 };
-exports.getAllKey = (req, res, next) => {
-  res.status(200).send("Set Your Bank Account Primary");
-};
-exports.getManager = (req, res, next) => {
-  res.status(200).send("Set Your Bank Account Primary");
-};
-exports.getAgent = (req, res, next) => {
-  res.status(200).send("Set Your Bank Account Primary");
-};
-exports.createNedajStation = (req, res, next) => {
-  res.status(200).send("Set Your Bank Account Primary");
-};
-exports.getNedajStation = (req, res, next) => {
-  res.status(200).send("Set Your Bank Account Primary");
-};
 
 exports.getAllMerchants = async (request, response) => {
   try {
@@ -580,5 +516,38 @@ exports.getAllMerchantsByPage = async (req, res) => {
   } catch (error) {
     console.error("Error fetching merchants:", error);
     res.status(500).json({ error: "Error fetching merchants" });
+  }
+};
+
+exports.resetPasswordRequestController = async (req, res, next) => {
+  console.log(req.body);
+  const requestPasswordResetService = await requestPasswordReset(
+    req.body.email
+  );
+  return res.json(requestPasswordResetService);
+};
+exports.resetPasswordController = async (req, res, next) => {
+  console.log(req.body);
+  const resetPasswordService = await resetPassword(
+    req.query.id,
+    req.query.token,
+    req.body.password
+  );
+  if (resetPasswordService) {
+    return res.json("Your Password is successfully reseted");
+  }
+};
+exports.changePassword = async (req, res, next) => {
+  const changePasswordService = await changePasswordServices(
+    req.body.phone_number,
+    req.body.old_password,
+    req.body.new_password
+  );
+  if (changePasswordService.code == 0) {
+    return res.status(404).json(changePasswordService.message);
+  } else if (changePasswordService.code == 1) {
+    return res.status(401).json(changePasswordService.message);
+  } else {
+    return res.status(200).json(changePasswordService.message);
   }
 };

@@ -232,6 +232,7 @@ exports.approveMerchantsByAdmin = async (req, res) => {
       const merchantDetail = await Ekyc.findOne({
         where: { merchant_id: merchantId },
       });
+      console.log(merchantDetail);
       if (merchantDetail) {
         if (merchantDetail.merchant_status == "Accepted") {
           return res
@@ -257,6 +258,8 @@ exports.approveMerchantsByAdmin = async (req, res) => {
         } else {
           return res.status(500).json({ message: "Not Approved" });
         }
+      } else if (merchantDetail == null) {
+        return res.status(404).json({ message: "Not Found" });
       }
     } else {
       return res

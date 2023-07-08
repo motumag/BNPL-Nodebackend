@@ -7,6 +7,12 @@ const kyc = require("../../models/eKyc.model");
 const ItemCategory = require("../../models/itemCategory.models");
 const Apikey = require("../../models/apiKeys.models");
 const Service = require("../../models/service.models");
+const Token = require("../../models/Token.models");
+const coopassPayment = require("../../models/payment.models");
+const paypalPayment = require("../../models/paypalPayment.models");
+const stripePayment = require("../../models/stripePayment.models");
+const chapaPayment = require("../../models/chapaPayment.models");
+const ebirrPayment = require("../../models/ebirrPayment.models");
 const Merchant = sequelize.define("merchants", {
   merchant_id: {
     type: DataTypes.INTEGER,
@@ -58,4 +64,16 @@ Merchant.hasOne(Apikey);
 Apikey.belongsTo(Merchant, { foreignKey: "merchant_id" });
 Merchant.belongsTo(Service, { as: "services", foreignKey: "services_id" });
 Service.hasMany(Merchant, { as: "merchant", foreignKey: "merchant_id" });
+Merchant.hasOne(Token, { as: "token", foreignKey: "token_id" });
+Token.belongsTo(Merchant, { as: "merchant", foreignKey: "merchant_id" });
+Merchant.hasMany(coopassPayment, { as: "coopasspayment" });
+coopassPayment.belongsTo(Merchant, { as: "merchant" });
+Merchant.hasMany(paypalPayment, { as: "paypalPayment" });
+paypalPayment.belongsTo(Merchant, { as: "merchant" });
+Merchant.hasMany(stripePayment, { as: "stripePayment" });
+stripePayment.belongsTo(Merchant, { as: "merchant" });
+Merchant.hasMany(chapaPayment, { as: "chapaPayment" });
+chapaPayment.belongsTo(Merchant, { as: "merchant" });
+Merchant.hasMany(ebirrPayment, { as: "EbirrPayment" });
+ebirrPayment.belongsTo(Merchant, { as: "merchant" });
 module.exports = Merchant;
