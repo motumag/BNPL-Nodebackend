@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const fs = require('fs');
+const fs = require("fs");
 const router = express.Router();
 const { grantAccess } = require("../middlewares/userVerification");
 
@@ -8,10 +8,9 @@ const { grantAccess } = require("../middlewares/userVerification");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const directory = "uploads/";
-
     // Create the directory if it doesn't exist
     fs.mkdirSync(directory, { recursive: true });
-    cb(null, directory); 
+    cb(null, directory);
     // cb(null, "uploads/"); // Set the destination directory for uploaded images
   },
   filename: (req, file, cb) => {
@@ -32,7 +31,13 @@ const {
   editItemById,
   editItemStatus,
   getAllItemsBySalesId,
-  editItemUpdateById
+  editItemUpdateById,
+  createItemCategory,
+  assignItemToCategory,
+  deleteCategory,
+  editCategory,
+  getAllCategory,
+  getCategoryById,
 } = require("../controllers/item.controller");
 // User routes
 
@@ -43,7 +48,11 @@ router.post(
   createNewItem
 );
 router.get("/getAll", grantAccess(["merchant"]), getAllItems);
-router.get("/getAllBySalesId", grantAccess(["merchant", "sales"]), getAllItemsBySalesId);
+router.get(
+  "/getAllBySalesId",
+  grantAccess(["merchant", "sales"]),
+  getAllItemsBySalesId
+);
 router.get("/getById", grantAccess(["merchant", "sales"]), getItemsById);
 router.post("/assigntoSales", grantAccess(["merchant"]), assignItemsToSales);
 router.post("/acceptItem", grantAccess(["sales"]), assignItemsToSalesApprove);
@@ -52,7 +61,26 @@ router.post(
   grantAccess(["merchant"]),
   configureLoanForitem
 );
-router.put("/editItem", grantAccess(["merchant"]), upload.single("picture"),editItemUpdateById);
-router.put("/editItemStatus", grantAccess(["merchant"]),editItemStatus);
-// router.put("/editItemUpdate",upload.single("picture"), grantAccess(["merchant"]),editItemUpdateById);
+router.put(
+  "/editItem",
+  grantAccess(["merchant"]),
+  upload.single("picture"),
+  editItemUpdateById
+);
+router.put("/editItemStatus", grantAccess(["merchant"]), editItemStatus);
+router.post(
+  "/createItemCategory",
+  // grantAccess(["merchant"]),
+  createItemCategory
+);
+router.post(
+  "/assignItemToCategory",
+  grantAccess(["merchant"]),
+  assignItemToCategory
+);
+router.get("/getAllCategories", grantAccess(["merchant"]), getAllCategory);
+router.get("/getCategoryById", getCategoryById);
+router.put("/editCategory",  editCategory);
+router.delete("/deleteCategory", grantAccess(["merchant"], deleteCategory));
+
 module.exports = router;

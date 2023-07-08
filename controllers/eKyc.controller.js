@@ -2,6 +2,10 @@ const Ekyc = require("../models/eKyc.model");
 const Merchant = require("../usermanagement/models/merchant.model");
 const BankAccount = require("../models/bankAccount.models");
 const { approveMerchants } = require("../middlewares/adminAuth");
+
+const { v4: uuidv4 } = require("uuid");
+const Services = require("../models/service.models");
+const { where } = require("sequelize");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 exports.createNewEkyc = async (req, res) => {
   try {
@@ -172,6 +176,25 @@ exports.createBankAccount = async function (req, res, next) {
     res.status(500).json({ message: "Error creating" });
   }
 };
+exports.setPrimaryAccount = async (req, res, next) => {
+  try {
+    const { merchant_id } = req.body;
+    const account_number = await BankAccount.findOne({
+      where: { merchant_id: merchant_id, account_level: "Secondary" },
+    });
+    if (account_number) {
+      account_number.account_level = "Primary";
+      account_number.save();
+      return res
+        .status(201)
+        .json({ message: "Primary Account Successfully Sated" });
+    } else {
+      return res.status(404).json({ message: "You Have NO Bank Account" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 exports.getMerchantAccountNumber = async function (req, res) {
   const { merchant_id } = req.query;
   try {
@@ -194,51 +217,57 @@ exports.getMerchantAccountNumber = async function (req, res) {
   }
 };
 exports.approveMerchantsByAdmin = async (req, res) => {
-  const { statusChange, merchantId } = req.body;
-  const tokenWithPrefix = req.headers.authorization;
-  const result = approveMerchants(tokenWithPrefix);
-  console.log("who are you?", result);
-  if (result == undefined) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to approve merchants" });
-  }
-  if (result == "Admin") {
-    const merchantDetail = await Ekyc.findOne({
-      where: { merchant_id: merchantId },
-    });
-    if (merchantDetail) {
-      if (merchantDetail.merchant_status == "Accepted") {
-        return res
-          .status(409)
-          .json({ message: "Merchant is already approved" });
-      }
-      // const merchantKycStatus = merchantDetail.merchant_status;
-      Ekyc.update(
-        { merchant_status: statusChange }, // Provide the new status value here
-        {
-          where: { merchant_id: merchantId }, // Specify the merchant ID to update
-        }
-      )
-        .then((resultUpdated) => {
-          // The update operation was successful
-          console.log("Merchant status updated successfully.");
-          return res.status(200).json({
-            message: "Merchant status updated successfully.",
-            resultUpdated,
-          });
-        })
-        .catch((error) => {
-          // Handle any errors that occur during the update operation
-          console.error("Error updating merchant status:", error);
-          return res
-            .status(500)
-            .json({ message: "Merchant status updated successfully." });
-        });
+  try {
+    const { statusChange, merchantId, service_id } = req.body;
+    const tokenWithPrefix = req.headers.authorization;
+    const result = approveMerchants(tokenWithPrefix);
+    const newId = uuidv4();
+    console.log("who are you?", result);
+    if (result == undefined) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to approve merchants" });
     }
-  } else {
-    return res
-      .status(400)
-      .json({ message: "You are not autorized to approve the merchantr" });
+    if (result == "Admin") {
+      const merchantDetail = await Ekyc.findOne({
+        where: { merchant_id: merchantId },
+      });
+      console.log(merchantDetail);
+      if (merchantDetail) {
+        if (merchantDetail.merchant_status == "Accepted") {
+          return res
+            .status(409)
+            .json({ message: "Merchant is already approved" });
+        }
+        // const merchantKycStatus = merchantDetail.merchant_status;
+
+        const ekycUpdate = await Ekyc.update(
+          { merchant_status: statusChange }, // Provide the new status value here
+          {
+            where: { merchant_id: merchantId }, // Specify the merchant ID to update
+          }
+        );
+        if (ekycUpdate) {
+          var merchant = await Merchant.findOne({
+            where: { merchant_id: merchantId },
+          });
+          merchant.secrate_key = newId;
+          merchant.services_id = service_id;
+          merchant.save();
+          return res.status(201).json({ message: "approved Successfully" });
+        } else {
+          return res.status(500).json({ message: "Not Approved" });
+        }
+      } else if (merchantDetail == null) {
+        return res.status(404).json({ message: "Not Found" });
+      }
+    } else {
+      return res
+        .status(400)
+        .json({ message: "You are not autorized to approve the merchantr" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };

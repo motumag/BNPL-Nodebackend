@@ -12,6 +12,8 @@ const salesRouter = require("./routers/sales.router");
 const pdfRoutes = require("./routers/pdfRoutes");
 const loanProcessRouter = require("./routers/loan_process.router");
 const customeEkycRouter = require("./routers/customerEkyc.router");
+const apiKeyRouter = require("./routers/apikey.router");
+const serviceRouter = require("./routers/service.router");
 const app = express();
 app.use(json());
 app.use(bodyParser.json());
@@ -32,6 +34,8 @@ app.use("/api/sales", salesRouter);
 app.use("/api/agreement", pdfRoutes);
 app.use("/api/customer-ekyc", customeEkycRouter);
 app.use("/api/loanprocess", loanProcessRouter);
+app.use("/api/apiKey", apiKeyRouter);
+app.use("/api/services", serviceRouter);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.info(`Running On Port 5000`);
