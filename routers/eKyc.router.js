@@ -45,6 +45,7 @@ router.post(
   createNewEkyc
 );
 router.get("/getKyc", grantAccess(["merchant"]), getMerchantKyc);
+router.get("/getAll", grantAccess(["merchant"]), getMerchantKyc);
 // router.get("/getAll", getAllMerchantKyc);
 router.post("/account", grantAccess(["merchant"]), createBankAccount);
 router.post("/setPrimaryAccount", grantAccess(["merchant"]), setPrimaryAccount);

@@ -219,28 +219,24 @@ exports.getItemsById = async (req, res) => {
     } else {
       res.status(200).json(items);
     }
-  } catch (error) {}
-};
-exports.assignItemsToSales = async (req, res) => {
-  try {
-    const { item_id, merchant_id, sales_id } = req.body;
-    const items = await Items.findByPk(item_id, {
-      where: { merchant_id: merchant_id, itemStatus: "Available" },
-      include: { model: Sales, as: "sales" },
-    });
-    const sales = await Sales.findOne({
-      where: { sales_id: sales_id },
-      include: { model: Items, as: "items" },
-    });
-    if (!items || !sales) {
-      res.status(404).json({ message: "No Record Found" });
-    } else {
-      items.itemStatus = "Pending";
-      await items.addSales(sales);
-      await items.save();
-      res.status(200).json({ status: "success" });
+} catch (error) {
+    
+}
+}
+exports.assignItemsToSales=async(req,res)=>{
+try {
+    const {item_id,merchant_id,sales_id}=req.body;
+    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id,itemStatus:"Available"},include:{model:Sales, as:"sales"}});
+    const sales = await Sales.findOne({where:{sales_id:sales_id}, include:{model:Items,as:"items"}})
+    if(!items || !sales){
+        res.status(404).json({"message":"No Record Found"})
+    }else{       
+        items.itemStatus="Pending"
+        await items.addSales(sales);
+        await items.save()        
+        res.status(200).json({status:"success"})
     }
-  } catch (error) {
+} catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
