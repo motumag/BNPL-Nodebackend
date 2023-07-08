@@ -70,7 +70,7 @@ router.put(
 router.put("/editItemStatus", grantAccess(["merchant"]), editItemStatus);
 router.post(
   "/createItemCategory",
-  grantAccess(["merchant"]),
+  // grantAccess(["merchant"]),
   createItemCategory
 );
 router.post(
@@ -78,9 +78,9 @@ router.post(
   grantAccess(["merchant"]),
   assignItemToCategory
 );
-router.get("/getAllCategories", grantAccess(["merchant"], getAllCategory));
-router.get("/getCategoryById", grantAccess(["merchant"], getCategoryById));
-router.put("/editCategory", grantAccess(["merchant"], editCategory));
+router.get("/getAllCategories", grantAccess(["merchant"]), getAllCategory);
+router.get("/getCategoryById", getCategoryById);
+router.put("/editCategory",  editCategory);
 router.delete("/deleteCategory", grantAccess(["merchant"], deleteCategory));
 
 module.exports = router;

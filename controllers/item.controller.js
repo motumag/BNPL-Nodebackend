@@ -345,7 +345,7 @@ exports.assignItemToCategory = async (req, res, next) => {
     if (!item || !item_category) {
       return res.status(400).json({ message: "Item Not Found" });
     }
-    await item_category.setItem(item);
+    await item_category.setItems(item);
     return res.status(200).json({ item_category });
   } catch (error) {
     console.error(error);
@@ -355,7 +355,7 @@ exports.assignItemToCategory = async (req, res, next) => {
 
 exports.getAllCategory = async (req, res, next) => {
   try {
-    const { merchant_id } = req.body;
+    const { merchant_id } = req.query;
     const category = await ItemCategory.findAll({
       where: { merchant_id: merchant_id },
       include: { model: Items },
@@ -371,7 +371,7 @@ exports.getAllCategory = async (req, res, next) => {
 };
 exports.getCategoryById = async (req, res, next) => {
   try {
-    const { merchant_id, item_category_id } = req.body;
+    const { merchant_id, item_category_id } = req.query;
     const category = await ItemCategory.findAll({
       where: { merchant_id: merchant_id, item_category_id: item_category_id },
       include: { model: Items },
@@ -395,7 +395,7 @@ exports.editCategory = async (req, res, next) => {
       return res.status(400).json({ message: "Not Found" });
     }
     category.type = type;
-    await category.save();
+    category.save();
     return res.status(200).json({ category });
   } catch (error) {
     console.error(error);

@@ -5,6 +5,8 @@ const Items = require("../../models/item.model");
 const LoanConf = require("../../models/LoanConfig.models");
 const kyc = require("../../models/eKyc.model");
 const ItemCategory = require("../../models/itemCategory.models");
+const Apikey = require("../../models/apiKeys.models");
+const Service = require("../../models/service.models");
 const Merchant = sequelize.define("merchants", {
   merchant_id: {
     type: DataTypes.INTEGER,
@@ -28,6 +30,14 @@ const Merchant = sequelize.define("merchants", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  client_id: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  secrate_key: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   role: {
     type: DataTypes.STRING,
     enum: ["merchant", "Admin", "supperAdmin"],
@@ -44,4 +54,8 @@ Merchant.hasOne(kyc, { foreignKey: "merchant_id", as: "merchantKyc" });
 kyc.belongsTo(Merchant, { foreignKey: "merchant_id", as: "merchantkyc" });
 Merchant.hasMany(ItemCategory, { foreignKey: "merchant_id" });
 ItemCategory.belongsTo(Merchant, { foreignKey: "merchant_id" });
+Merchant.hasOne(Apikey);
+Apikey.belongsTo(Merchant, { foreignKey: "merchant_id" });
+Merchant.belongsTo(Service, { as: "services", foreignKey: "services_id" });
+Service.hasMany(Merchant, { as: "merchant", foreignKey: "merchant_id" });
 module.exports = Merchant;

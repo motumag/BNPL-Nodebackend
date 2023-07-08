@@ -11,7 +11,8 @@ const {
   createBankAccount,
   getMerchantAccountNumber,
   getAllMerchantEkyc,
-  approveMerchantsByAdmin
+  approveMerchantsByAdmin,
+  setPrimaryAccount,
 } = require("../controllers/eKyc.controller");
 const merchantUpload = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -46,6 +47,7 @@ router.post(
 router.get("/getKyc", grantAccess(["merchant"]), getMerchantKyc);
 // router.get("/getAll", getAllMerchantKyc);
 router.post("/account", grantAccess(["merchant"]), createBankAccount);
+router.post("/setPrimaryAccount", grantAccess(["merchant"]), setPrimaryAccount);
 router.get("/account", grantAccess(["merchant"]), getMerchantAccountNumber);
 router.get("/merchant", getAllMerchantEkyc);
 router.post("/approve-merchant", approveMerchantsByAdmin);

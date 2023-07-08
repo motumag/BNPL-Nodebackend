@@ -23,7 +23,8 @@
     "nodemailer": "^6.9.3",
     "pdf-lib": "^1.17.1",
     "pg": "^8.11.0",
-    "sequelize": "^6.31.1"
+    "sequelize": "^6.31.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
