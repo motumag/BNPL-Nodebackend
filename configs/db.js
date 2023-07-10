@@ -31,7 +31,7 @@ async function testConnection() {
 sequelize
   .sync({ alter: true })
   .then(() => {
-    console.log("Drop and Re sync the database!");
+    console.log("Drop and Resync the database!");
     // initial();
   })
   .catch((error) => {
