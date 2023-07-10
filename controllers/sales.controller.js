@@ -14,9 +14,16 @@ exports.getAllSales = async (req, res) => {
       where: {
         merchant_id: id,
       },
-      attributes: ["sales_id", "email_address", "emailStatus", "phone_number"],
+      attributes: [
+        "sales_id",
+        "email_address",
+        "emailStatus",
+        "phone_number",
+        "firstName",
+        "lastName",
+      ],
     });
-    res.status(200).json(sales);
+    return res.status(200).json(sales);
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -35,7 +42,7 @@ exports.getSalesById = async (req, res) => {
     if (!sales) {
       res.status(404).json({ message: "Their is no item with these Id" });
     } else {
-      res.status(200).json(sales);
+      return res.status(200).json(sales);
     }
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -122,7 +129,7 @@ exports.loginSales = async (req, res) => {
 };
 exports.registerSales = async (req, res, next) => {
   try {
-    const { username, merchant_id } = req.body;
+    const { username, merchant_id, firstName, lastName } = req.body;
     console.log(req.body);
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const phoneRegex = /^\d{10}$/;
@@ -143,19 +150,20 @@ exports.registerSales = async (req, res, next) => {
         // Generate Random Password
         const password = utils.generateRandomPassword();
         // Hash the password
+        utils.sendSalesEmail({ email_address: username, password: password });
         const hashedPassword = await bcrypt.hash(password, 10);
         // Create the manager
         const registeredSales = await Sales.create({
+          emailStatus: "Approved",
+          firstName: firstName,
+          lastName: lastName,
           email_address: username,
           password: hashedPassword,
           merchant_id: existingMerchant.merchant_id,
+          status: "Approved",
         });
-        utils.sendEmail(
-          registeredSales.sales_id,
-          registeredSales.email_address,
-          password
-        );
-        res.status(201).json({ status: "success", password });
+
+        return res.status(201).json({ status: "success", password });
       }
     } else if (isPhone) {
       const existingmerchant = await Merchant.findByPk(merchant_id);
@@ -168,18 +176,20 @@ exports.registerSales = async (req, res, next) => {
       } else {
         // Generate Random Password
         const password = utils.generateRandomPassword();
+        utils.sendMessage({ phone_number: username, password: password });
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
         // Create the manager
         const registeredSales = await Sales.create({
+          emailStatus: "Approved",
+          firstName: firstName,
+          lastName: lastName,
           phone_number: username,
           password: hashedPassword,
           merchant_id: existingmerchant.merchant_id,
+          status: "Approved",
         });
-        utils.sendMessage(
-          registeredSales.sales_id,
-          registeredSales.phone_number
-        );
+
         res.status(201).json({ status: "success", password });
       }
     } else {
@@ -212,7 +222,7 @@ exports.sendRequestForApproval = async (req, res) => {
           first_name,
           last_name,
           tin_number,
-          valid_identification: IMAGE_UPLOAD_BASE_URL+valid_identification,
+          valid_identification: IMAGE_UPLOAD_BASE_URL + valid_identification,
         });
         res.status(201).json({ message: "Sales Kyc Created" });
       }
@@ -242,18 +252,24 @@ exports.getAllSalesKyc = async (req, res, next) => {
 };
 exports.approveSalesKyc = async (req, res, next) => {
   try {
-    const {sales_kyc_id,merchant_id}=req.body;
-    const salesKyc = await SalesKyc.findOne({where:{kyc_id:sales_kyc_id}, include:{model:Sales, as:"sales", where:{merchant_id:merchant_id}}});
+    const { sales_kyc_id, merchant_id } = req.body;
+    const salesKyc = await SalesKyc.findOne({
+      where: { kyc_id: sales_kyc_id },
+      include: {
+        model: Sales,
+        as: "sales",
+        where: { merchant_id: merchant_id },
+      },
+    });
     if (!salesKyc) {
       return res.status(400).json({ message: "Sales Kyc Not Found" });
-    }else{
-      if (salesKyc.status=="Approved") {
-        res.status(200).json({ message: 'already approved'});
+    } else {
+      if (salesKyc.status == "Approved") {
+        res.status(200).json({ message: "already approved" });
       } else {
         await salesKyc.update({ status: "Approved" });
         res.status(200).json({ message: "Sales Kyc Approved" });
       }
-      
     }
   } catch (error) {
     console.error(error);
@@ -262,17 +278,24 @@ exports.approveSalesKyc = async (req, res, next) => {
 };
 exports.rejectSalesKyc = async (req, res, next) => {
   try {
-    const {sales_kyc_id,merchant_id}=req.body;
-    const salesKyc = await SalesKyc.findOne({where:{kyc_id:sales_kyc_id}, include:{model:Sales, as:"sales", where:{merchant_id:merchant_id}}});
+    const { sales_kyc_id, merchant_id } = req.body;
+    const salesKyc = await SalesKyc.findOne({
+      where: { kyc_id: sales_kyc_id },
+      include: {
+        model: Sales,
+        as: "sales",
+        where: { merchant_id: merchant_id },
+      },
+    });
     if (!salesKyc) {
       return res.status(400).json({ message: "Sales Kyc Not Found" });
-    }else{
-      if (salesKyc.status=="Rejected") {
-        res.status(200).json({ message: 'already rejected'});
+    } else {
+      if (salesKyc.status == "Rejected") {
+        res.status(200).json({ message: "already rejected" });
       } else {
         await salesKyc.update({ status: "Rejected" });
         res.status(200).json({ message: "Sales Kyc Rejected" });
-      }    
+      }
     }
   } catch (error) {
     console.error(error);

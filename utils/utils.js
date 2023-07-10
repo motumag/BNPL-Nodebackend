@@ -101,7 +101,7 @@ exports.sendEmail = (id, email_address, password, type = "merchant") => {
     }
   });
 };
-exports.sendSalesEmail = (email_address, password) => {
+exports.sendSalesEmail = ({email_address, password}) => {
   const subject = "Default Password";
   // Create a transporter with your SMTP configuration
   const transporter = nodemailer.createTransport({
@@ -116,8 +116,7 @@ exports.sendSalesEmail = (email_address, password) => {
     from: "amaedris1@gmail.com",
     to: email_address,
     subject: subject,
-    text:  "Your Password Is " + password,
-    
+    text: "Your Password Is " + password,
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
@@ -130,10 +129,11 @@ exports.sendSalesEmail = (email_address, password) => {
     }
   });
 };
-exports.sendMessage = (id, phone_number, type = "sales") => {
+exports.sendMessage = ({ id, phone_number, password, type = "sales" }) => {
   // Make a POST request
-  const registerUrl = `${process.env.EMAIL_ACTIVATION_END_POINT}?id=${id}&type=${type}`;
-
+  // const registerUrl = `${process.env.EMAIL_ACTIVATION_END_POINT}?id=${id}&type=${type} your Password is: ${password}`;
+  const registerUrl = `${password}`;
+  console.log(registerUrl, " ", phone_number);
   axios
     .post(process.env.OTP_ENDPOINT, {
       Text: registerUrl,
@@ -146,7 +146,7 @@ exports.sendMessage = (id, phone_number, type = "sales") => {
       console.error("Error:", error.message);
     });
 };
-exports.sendSalesMessage = (phone_number,password) => {
+exports.sendSalesMessage = (phone_number, password) => {
   // Make a POST request
   axios
     .post(process.env.OTP_ENDPOINT, {
@@ -160,4 +160,3 @@ exports.sendSalesMessage = (phone_number,password) => {
       console.error("Error:", error.message);
     });
 };
-

@@ -296,20 +296,21 @@ exports.registerSales = async (req, res, next) => {
         // Generate Random Password
         const password = utils.generateRandomPassword();
         // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
         // Create the manager
+        console.log("password: " + password);
+        // utils.sendMessage(
+        //   registeredSales.sales_id,
+        //   registeredSales.phone_number,
+        //   password
+        // );
+        const hashedPassword = await bcrypt.hash(password, 10);
         const registeredSales = await Sales.create({
           phone_number: username,
           password: hashedPassword,
-          merchant_id: existingMerchant.merchant_id,
+          merchant_id: existingmerchant.merchant_id,
+          status: "Approved",
         });
-        console.log(password);
-        utils.sendMessage(
-          registeredSales.sales_id,
-          registeredSales.phone_number,
-          (password = password)
-        );
-        res.status(201).json({ status: "success", password });
+        return res.status(201).json({ status: "success", password });
       }
     }
   } catch (error) {
