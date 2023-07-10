@@ -104,7 +104,7 @@ exports.loginSales = async (req, res) => {
           if (passwordMatch) {
             const token = jwt.sign(
               {
-                sales_id: sales.user_id,
+                sales_id: sales.sales_id,
                 phone_number: sales.phone_number,
                 role: sales.role,
               },
