@@ -254,7 +254,7 @@ exports.approveMerchantsByAdmin = async (req, res) => {
           merchant.secrate_key = newId;
           merchant.services_id = service_id;
           merchant.save();
-          return res.status(201).json({ message: "approved Successfully" });
+          return res.status(200).json({ message: "approved Successfully" });
         } else {
           return res.status(500).json({ message: "Not Approved" });
         }

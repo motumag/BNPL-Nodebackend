@@ -60,7 +60,7 @@ const Kyc = sequelize.define("merchant_ekyc", {
   },
   merchant_status: {
     type: DataTypes.STRING,
-    enum: ["Pending", "Accepted", "Available"],
+    enum: ["Pending", "Accepted", "Rejected"],
     defaultValue: "Pending",
   },
 });
