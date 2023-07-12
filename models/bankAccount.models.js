@@ -12,6 +12,10 @@ const BankAccount = sequelize.define("bankAccount", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  phone_number: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   account_level: {
     type: DataTypes.STRING,
     enum: ["Primary", "Secondary"],

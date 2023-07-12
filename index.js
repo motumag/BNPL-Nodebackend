@@ -14,6 +14,8 @@ const loanProcessRouter = require("./routers/loan_process.router");
 const customeEkycRouter = require("./routers/customerEkyc.router");
 const apiKeyRouter = require("./routers/apikey.router");
 const serviceRouter = require("./routers/service.router");
+const userRouter = require("./routers/user.router");
+const paymentRouter = require("./routers/payment.router");
 const app = express();
 app.use(json());
 app.use(bodyParser.json());
@@ -36,6 +38,8 @@ app.use("/api/customer-ekyc", customeEkycRouter);
 app.use("/api/loanprocess", loanProcessRouter);
 app.use("/api/apiKey", apiKeyRouter);
 app.use("/api/services", serviceRouter);
+app.use("/api/user", userRouter);
+app.use("/api", paymentRouter);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.info(`Running On Port 5000`);

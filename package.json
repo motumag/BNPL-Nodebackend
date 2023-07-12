@@ -16,6 +16,7 @@
     "body-parser": "^1.20.2",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
@@ -24,7 +25,10 @@
     "pdf-lib": "^1.17.1",
     "pg": "^8.11.0",
     "sequelize": "^6.31.1",
-    "uuid": "^9.0.0"
+    "short-uuid": "^4.2.2",
+    "stripe": "^12.4.0",
+    "uuid": "^9.0.0",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

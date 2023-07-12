@@ -1,6 +1,9 @@
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
+const fs = require("fs");
+const https = require("https");
+const path = require("path");
 exports.generateRandomPassword = () => {
   const length = 10; // Length of the generated password
   const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -101,7 +104,7 @@ exports.sendEmail = (id, email_address, password, type = "merchant") => {
     }
   });
 };
-exports.sendSalesEmail = ({email_address, password}) => {
+exports.sendSalesEmail = ({ email_address, password }) => {
   const subject = "Default Password";
   // Create a transporter with your SMTP configuration
   const transporter = nodemailer.createTransport({
@@ -159,4 +162,35 @@ exports.sendSalesMessage = (phone_number, password) => {
     .catch((error) => {
       console.error("Error:", error.message);
     });
+};
+exports.generateRandomNumber = async function () {
+  const min = 100000; // Minimum 8-digit number (inclusive)
+  const max = 999999; // Maximum 8-digit number (inclusive)
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+exports.getToken = async function (email, password) {
+  try {
+    // Read the certificate file
+    const cert = path.join(__dirname, "../", "Cooperative Bank.crt");
+    const certificate = fs.readFileSync(cert, "utf8");
+    // Create an instance of the HTTPS agent
+    const httpsAgent = new https.Agent({
+      cert: certificate,
+      rejectUnauthorized: false,
+      // Additional options if required (e.g., ca, passphrase, etc.)
+    });
+    // Configure Axios to use the HTTPS agent
+    const axiosInstance = axios.create({
+      httpsAgent: httpsAgent,
+    });
+    const response = await axiosInstance.post(process.env.SPRING_ENDPOINT, {
+      email: email,
+      password: password,
+    });
+    console.log(response.data.token);
+    return response.data.token;
+  } catch (error) {
+    console.error("Error during login:", error);
+    throw error;
+  }
 };

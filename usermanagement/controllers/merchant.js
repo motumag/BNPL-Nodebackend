@@ -254,7 +254,7 @@ exports.registerSales = async (req, res, next) => {
     const phoneRegex = /^\d{10}$/;
     const isEmail = emailRegex.test(username);
     const isPhone = phoneRegex.test(username);
-    // Check if the email is already registered for a manager
+    // Check if the email is alreclsady registered for a manager
     if (isEmail) {
       const existingMerchant = await Merchant.findByPk(merchant_id);
       if (!existingMerchant) {

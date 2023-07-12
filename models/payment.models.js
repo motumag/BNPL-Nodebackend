@@ -17,7 +17,7 @@ const coopassPayment = sequelize.define("coopassPayment", {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   currency: {
     type: DataTypes.STRING,

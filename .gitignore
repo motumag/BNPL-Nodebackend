@@ -1,5 +1,10 @@
 node_modules
 .env
+.gitignore
 uploads
 DockerFile
 .dockerignore
+Cooperative Bank.crt
+server.cert
+server.key
+logfile.log
