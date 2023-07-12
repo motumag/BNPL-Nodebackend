@@ -254,33 +254,34 @@ exports.initiatePayment = async (req, res) => {
   }
 };
 exports.initiateStripePayment = async (req, res) => {
-  const clientId = req.body.clientId;
-  const secretKey = req.body.secrateKey;
-  const apiKey = req.body.apiKey;
-  const orderId = req.body.orderId;
-  const currency = req.body.currency;
-  const amount = req.body.amount;
-  const returnUrl = req.body.returnUrl;
-  const phoneNumber = req.body.phoneNumber;
-  const callBackUrl = req.body.callBackUrl;
-  const timestamp = new Date().getTime().toString();
-  logger.log({
-    level: "info",
-    message: "Payment Initiated Request",
-    request: {
-      clientId,
-      secretKey,
-      apiKey,
-      orderId,
-      currency,
-      amount,
-    },
-  });
-  const encryptedData = CryptoJS.AES.encrypt(
-    timestamp,
-    process.env.ENCRYPTION_KEY
-  ).toString();
   try {
+    const clientId = req.body.clientId;
+    const secretKey = req.body.secrateKey;
+    const apiKey = req.body.apiKey;
+    const orderId = req.body.orderId;
+    const currency = req.body.currency;
+    const amount = req.body.amount;
+    const returnUrl = req.body.returnUrl;
+    const phoneNumber = req.body.phoneNumber;
+    const callBackUrl = req.body.callBackUrl;
+    const timestamp = new Date().getTime().toString();
+    logger.log({
+      level: "info",
+      message: "Payment Initiated Request",
+      request: {
+        clientId,
+        secretKey,
+        apiKey,
+        orderId,
+        currency,
+        amount,
+      },
+    });
+    const encryptedData = CryptoJS.AES.encrypt(
+      timestamp,
+      process.env.ENCRYPTION_KEY
+    ).toString();
+
     const stripePayment = await StripePayment.findOne({
       where: {
         orderID: orderId,
@@ -291,16 +292,16 @@ exports.initiateStripePayment = async (req, res) => {
     } else {
       const initiateStripePayment = await StripePayment.create({
         orderID: orderId,
-        email: req.user.email_address,
+        email: req.merchant.email_address,
         currency: currency,
         endPointIdentifier: timestamp,
         amount: amount,
         returnUrl: returnUrl,
         payeePhone: phoneNumber,
         callBackUrl: callBackUrl,
-        creditAccount: req.user.banckAccount[0].accountNumber,
+        creditAccount: req.merchant.bankAccount[0].account_number,
       });
-      await initiateStripePayment.setUser(req.user);
+      await initiateStripePayment.setMerchant(req.merchant);
       logger.log({
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",
@@ -321,39 +322,40 @@ exports.initiateStripePayment = async (req, res) => {
   }
 };
 exports.initiatePaypalPayment = async (req, res) => {
-  const clientId = req.body.clientId;
-  const secretKey = req.body.secrateKey;
-  const apiKey = req.body.apiKey;
-  const orderId = req.body.orderId;
-  const currency = req.body.currency;
-  const amount = req.body.amount;
-  const returnUrl = req.body.returnUrl;
-  const phoneNumber = req.body.phoneNumber;
-  const callBackUrl = req.body.callBackUrl;
-  const paymentService = req.body.paymentService;
-  // replace this with your own data
-  // const hash = crypto.createHash('md5').update(clientId).digest('hex');
-
-  const timestamp = new Date().getTime().toString();
-
-  logger.log({
-    level: "info",
-    message: "Payment Initiated Request",
-    request: {
-      clientId,
-      secretKey,
-      apiKey,
-      orderId,
-      currency,
-      amount,
-      paymentService,
-    },
-  });
-  const encryptedData = CryptoJS.AES.encrypt(
-    timestamp,
-    process.env.ENCRYPTION_KEY
-  ).toString();
   try {
+    const clientId = req.body.clientId;
+    const secretKey = req.body.secrateKey;
+    const apiKey = req.body.apiKey;
+    const orderId = req.body.orderId;
+    const currency = req.body.currency;
+    const amount = req.body.amount;
+    const returnUrl = req.body.returnUrl;
+    const phoneNumber = req.body.phoneNumber;
+    const callBackUrl = req.body.callBackUrl;
+    const paymentService = req.body.paymentService;
+    // replace this with your own data
+    // const hash = crypto.createHash('md5').update(clientId).digest('hex');
+
+    const timestamp = new Date().getTime().toString();
+
+    logger.log({
+      level: "info",
+      message: "Payment Initiated Request",
+      request: {
+        clientId,
+        secretKey,
+        apiKey,
+        orderId,
+        currency,
+        amount,
+        paymentService,
+      },
+    });
+    const encryptedData = CryptoJS.AES.encrypt(
+      timestamp,
+      process.env.ENCRYPTION_KEY
+    ).toString();
+
     const payment = await PaypalPayment.findOne({
       where: {
         paypalOrderId: orderId,
@@ -370,10 +372,10 @@ exports.initiatePaypalPayment = async (req, res) => {
         returnUrl: returnUrl,
         payeePhone: phoneNumber,
         callBackUrl: callBackUrl,
-        creditAccount: req.user.banckAccount[0].accountNumber,
+        creditAccount: req.merchant.bankAccount[0].account_number,
         paymentService: req.body.paymentService,
       });
-      await payp.setUser(req.user);
+      await payp.setMerchant(req.merchant);
       logger.log({
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",

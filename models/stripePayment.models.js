@@ -21,7 +21,7 @@ const StripePayment = sequelize.define("StripePayments", {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   currency: {
     type: DataTypes.STRING,

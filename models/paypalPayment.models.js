@@ -25,7 +25,7 @@ const PaypalPayment = sequelize.define("PaypalPayments", {
   },
   amount: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   currency: {
     type: DataTypes.STRING,
@@ -68,7 +68,7 @@ const PaypalPayment = sequelize.define("PaypalPayments", {
   },
   creditAccount: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   callBackUrl: {
     type: DataTypes.STRING,
