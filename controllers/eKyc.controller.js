@@ -153,7 +153,7 @@ exports.getAllMerchantEkyc = async (request, response) => {
 exports.createBankAccount = async function (req, res, next) {
   // console.log("The incomming req is: ", inc.compliance_aml);
   try {
-    const { merchant_id, account_number } = req.body;
+    const { merchant_id, account_number, phone_number } = req.body;
     const merchant_account_number = await BankAccount.findOne({
       where: { account_number: account_number },
     });
@@ -162,6 +162,7 @@ exports.createBankAccount = async function (req, res, next) {
     } else {
       const account_num = await BankAccount.create({
         account_number: account_number,
+        phone_number: phone_number,
       });
       const merchant = await Merchant.findOne({
         where: { merchant_id: merchant_id },
@@ -178,10 +179,25 @@ exports.createBankAccount = async function (req, res, next) {
 };
 exports.setPrimaryAccount = async (req, res, next) => {
   try {
-    const { merchant_id } = req.body;
+    const { merchant_id, bank_account_id } = req.body;
     const account_number = await BankAccount.findOne({
-      where: { merchant_id: merchant_id, account_level: "Secondary" },
+      where: {
+        merchant_id: merchant_id,
+        bank_account_id: bank_account_id,
+        account_level: "Secondary",
+      },
     });
+    const primary_account_number = await BankAccount.findOne({
+      where: {
+        merchant_id: merchant_id,
+        bank_account_id: bank_account_id,
+        account_level: "Primary",
+      },
+    });
+    if (primary_account_number) {
+      primary_account_number.account_level = "Secondary";
+      primary_account_number.save();
+    }
     if (account_number) {
       account_number.account_level = "Primary";
       account_number.save();
