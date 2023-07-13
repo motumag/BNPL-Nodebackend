@@ -10,12 +10,12 @@ const grantAccess = (roles) => {
     console.log(token);
     // Check if the user's role is allowed
     if (token) {
-      jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      jwt.verify(token, process.env.JWT_SECRET, (err, merchant) => {
         if (err) {
           res.status(403).send("Forbidde");
         } else {
-          console.log(user.role);
-          if (roles.includes(user.role)) {
+          console.log(merchant.role);
+          if (roles.includes(merchant.role)) {
             next();
           } else {
             res.status(403).send("Forbidden");
