@@ -26,7 +26,9 @@ const {
   verifyPayment,
   verifyPaypalPayment,
   verifyStripePayment,
+  coopassPayment,
 } = require("../controllers/payment.controller");
+// const coopassPayment = require("../models/payment.models");
 // // User routes
 // router.post("/create", grantAccess(["merchant"]), createServices);
 // router.get("/get", grantAccess(["merchant", "sales"]), getServices);
@@ -79,6 +81,12 @@ router.post(
   paymentServices(["EBIRR"]),
   verifyKeys,
   EbirrPayment
+);
+router.post(
+  "/coopas_payment",
+  paymentServices(["COOPASS"]),
+  verifyKeys,
+  coopassPayment
 );
 router.post("/chapa_call_back", chapa_call_back_url);
 module.exports = router;

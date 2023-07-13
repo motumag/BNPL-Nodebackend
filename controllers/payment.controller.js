@@ -1077,3 +1077,105 @@ exports.updatePaymentService = async (req, res, next) => {
     return res.status(201).json({ message: "updated" });
   }
 };
+exports.coopassPayment = async (req, res, next) => {
+  try {
+    const { debitAccount, amount, currency, orderId, clientId, phoneNumber } =
+      req.body;
+
+    // const messageId =
+    //   Date.now().toString(30) + Math.random().toString(30).substr(2);
+    const messageId = orderId;
+    const debitCurrency = currency;
+    const debitAmount = amount;
+    logger.log({
+      level: "info",
+      message: "Payment Process Request to the Spring Boot Backend",
+      request: {
+        messageId: messageId,
+        clientId: clientId,
+        debitAccount: debitAccount,
+        debitCurrency: debitCurrency,
+        debitAmount: debitAmount,
+        creditAccount: req.merchant.bankAccount[0].account_number,
+      },
+    });
+    await Payment.create({
+      orderID: orderId,
+      email: req.merchant.email_address,
+      currency: debitCurrency,
+      amount: debitAmount,
+      payeePhone: phoneNumber,
+      creditAccount: req.merchant.bankAccount[0].account_number,
+    });
+
+    const jsonData = JSON.stringify({
+      messageId,
+      clientId,
+      debitAccount,
+      debitAmount,
+      creditAccount: req.merchant.bankAccount[0].account_number,
+    });
+    const url = process.env.PAYMENT_URLS + "create-payment";
+    const token = await utils.getToken(
+      process.env.EMAIL,
+      process.env.PASSWORD_AUTH
+    );
+
+    // Create an instance of the HTTPS agent
+    const httpsAgent = new https.Agent({
+      cert: certificate,
+      rejectUnauthorized: false,
+      // Additional options if required (e.g., ca, passphrase, etc.)
+    });
+    const agent = new https.Agent({
+      cert: cert,
+      key: key,
+    });
+    // Configure Axios to use the HTTPS agent
+    const axiosInstance = axios.create({
+      httpsAgent: httpsAgent,
+    });
+    const options = {
+      agent: agent,
+    };
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const paymentStatus = await Payment.findOne({
+      where: { orderID: orderId },
+    });
+    if (paymentStatus) {
+      await axiosInstance
+        .post(url, jsonData, config)
+        .then((response) => {
+          if (response.status == 201) {
+            paymentStatus.status = "COMPLETED";
+            paymentStatus.transactionId = response.data.transactionID;
+            paymentStatus.save();
+            logger.log({
+              level: "info",
+              message: "Payment Response",
+              response: {
+                parsedData,
+              },
+            });
+            return res.status(201).send({
+              status: "success",
+              data: parsedData,
+              returnUrl: paymentStatus.returnUrl,
+            });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          return res.status(500).json(error.message);
+        });
+    } else {
+      return res.status(404).json({ message: "No Pending Payment found " });
+    }
+  } catch (error) {
+    return res.status(500).send("Internal Server Error");
+  }
+};
