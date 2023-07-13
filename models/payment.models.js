@@ -30,7 +30,7 @@ const coopassPayment = sequelize.define("coopassPayment", {
 
   endPointIdentifier: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   creditAccount: {
     type: DataTypes.STRING,
