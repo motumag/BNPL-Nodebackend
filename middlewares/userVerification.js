@@ -36,7 +36,6 @@ const paymentServices = (payment) => {
         status: true,
       },
     });
-    console.log(payment_service);
     if (payment_service) {
       next();
     } else {
@@ -70,7 +69,6 @@ const verifyKeys = async (req, res, next) => {
         },
       ],
     });
-    console.log(merchant.bankAccount);
     if (merchant) {
       req.merchant_id = merchant.merchant_id;
       req.merchant = merchant;
