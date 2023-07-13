@@ -7,6 +7,6 @@ const {
   getServices,
 } = require("../controllers/service.controller");
 // User routes
-router.post("/create", grantAccess(["merchant"]), createServices);
+router.post("/create", grantAccess(["Admin"]), createServices);
 router.get("/get", grantAccess(["merchant", "sales"]), getServices);
 module.exports = router;
