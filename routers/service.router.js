@@ -8,5 +8,5 @@ const {
 } = require("../controllers/service.controller");
 // User routes
 router.post("/create", grantAccess(["Admin"]), createServices);
-router.get("/get", grantAccess(["merchant", "sales"]), getServices);
+router.get("/get", grantAccess(["Admin"]), getServices);
 module.exports = router;
