@@ -740,7 +740,6 @@ exports.paypalPyment = async (req, res) => {
     currency_code,
     orderId,
     payeeMerchant_id,
-
     status,
     transactionId,
     payeeEmail,
