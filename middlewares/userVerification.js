@@ -39,7 +39,7 @@ const paymentServices = (payment) => {
     if (payment_service) {
       next();
     } else {
-      res.status(400).json({ message: "Payment service not found" });
+      return res.status(400).json({ message: "Payment service not found" });
     }
   };
 };
