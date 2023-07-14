@@ -180,6 +180,21 @@ exports.createBankAccount = async function (req, res, next) {
 exports.setPrimaryAccount = async (req, res, next) => {
   try {
     const { merchant_id, bank_account_id } = req.body;
+    const primary_account_number = await BankAccount.findAll({
+      where: {
+        merchant_id: merchant_id,
+        // bank_account_id: bank_account_id,
+        account_level: "Primary",
+      },
+    });
+
+    if (primary_account_number) {
+      console.log(primary_account_number);
+      primary_account_number.forEach((bankAccount) => {
+        bankAccount.account_level = "Secondary";
+        bankAccount.save();
+      });
+    }
     const account_number = await BankAccount.findOne({
       where: {
         merchant_id: merchant_id,
@@ -187,17 +202,6 @@ exports.setPrimaryAccount = async (req, res, next) => {
         account_level: "Secondary",
       },
     });
-    const primary_account_number = await BankAccount.findOne({
-      where: {
-        merchant_id: merchant_id,
-        bank_account_id: bank_account_id,
-        account_level: "Primary",
-      },
-    });
-    if (primary_account_number) {
-      primary_account_number.account_level = "Secondary";
-      primary_account_number.save();
-    }
     if (account_number) {
       account_number.account_level = "Primary";
       account_number.save();

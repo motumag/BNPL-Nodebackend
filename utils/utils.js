@@ -8,7 +8,7 @@ exports.generateRandomPassword = () => {
   const length = 10; // Length of the generated password
   const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
-  const specialChars = "#$%^&*()~`}{[]";
+  const specialChars = "#$%^&*()";
 
   let password = "";
 
@@ -69,12 +69,12 @@ exports.sendEmail = (id, email_address, password, type = "merchant") => {
       <meta charset="UTF-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Activate Your Epay Account</title>
+      <title>Activate Your Souqpass Account</title>
     </head>
     <body>
-      <h2>Activate Your Epay Account - Action Required</h2>
+      <h2>Activate Your Souqpass Account - Action Required</h2>
       <p>Dear [User's Name],</p>
-      <p>Thank you for choosing Epay as your trusted payment gateway. We're excited to have you on board! To fully activate your Epay account, we kindly request that you complete the account activation process.</p>
+      <p>Thank you for choosing Souqpass as your trusted payment gateway. We're excited to have you on board! To fully activate your Souqpass account, we kindly request that you complete the account activation process.</p>
       <p>To activate your account, please follow the simple steps below:</p>
       <p>Password:${password}</p>
       <ol>
@@ -82,13 +82,13 @@ exports.sendEmail = (id, email_address, password, type = "merchant") => {
         <li>You will be redirected to a secure activation page. Fill in the required information, including your username and password.</li>
         <li>Once you have entered the necessary details, click on the "Activate Account" button to confirm your activation.</li>
       </ol>
-      <p>That's it! Your Epay account will be successfully activated, and you will gain access to our comprehensive merchant dashboard.</p>
+      <p>That's it! Your Souqpass account will be successfully activated, and you will gain access to our comprehensive merchant dashboard.</p>
       <p>Should you have any questions or encounter any issues during the activation process, please don't hesitate to contact our dedicated support team at <a href="mailto:[Support Email]">[Support Email]</a> or call us at [Support Phone Number]. We're here to assist you every step of the way.</p>
-      <p>Thank you for choosing Epay as your payment gateway partner. We look forward to serving your payment processing needs and helping your business thrive.</p>
+      <p>Thank you for choosing Souqpass as your payment gateway partner. We look forward to serving your payment processing needs and helping your business thrive.</p>
       <p>Best regards,<br>
       [Your Name]<br>
       [Your Position/Title]<br>
-      Epay Support Team</p>
+      Souqpass Support Team</p>
     </body>
     </html>
   `,
