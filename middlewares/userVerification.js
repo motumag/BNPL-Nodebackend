@@ -7,15 +7,15 @@ const grantAccess = (roles) => {
   return (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
-    console.log(token);
     // Check if the user's role is allowed
+    console.log(token);
     if (token) {
-      jwt.verify(token, process.env.JWT_SECRET, (err, merchant) => {
+      jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
           res.status(403).send("Forbidde");
         } else {
-          console.log(merchant.role);
-          if (roles.includes(merchant.role)) {
+          console.log(user.role);
+          if (roles.includes(user.role)) {
             next();
           } else {
             res.status(403).send("Forbidden");
