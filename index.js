@@ -16,6 +16,7 @@ const apiKeyRouter = require("./routers/apikey.router");
 const serviceRouter = require("./routers/service.router");
 const userRouter = require("./routers/user.router");
 const paymentRouter = require("./routers/payment.router");
+const transactionRouter = require("./routers/transaction.router");
 const app = express();
 app.use(json());
 app.use(bodyParser.json());
@@ -40,6 +41,7 @@ app.use("/api/apiKey", apiKeyRouter);
 app.use("/api/services", serviceRouter);
 app.use("/api/user", userRouter);
 app.use("/api", paymentRouter);
+app.use("/api/transaction", transactionRouter);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.info(`Running On Port 5000`);
