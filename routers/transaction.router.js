@@ -20,37 +20,37 @@ router.get(
 );
 router.get(
   "/stripetransaction",
-  // grantAccess(["user", "admin"]),
+  grantAccess(["merchant", "Admin"]),
   stripetransaction
 );
 router.get(
   "/allstripetransaction",
-  grantAccess(["admin"]),
+  grantAccess(["Admin"]),
   getAllStripeTransaction
 );
 router.get(
   "/allcoopasstransactions",
-  grantAccess(["admin"]),
+  grantAccess(["Admin"]),
   getAllTransaction
 );
 router.get(
   "/paypalTransaction",
-  grantAccess(["user", "admin"]),
+  grantAccess(["merchant", "Admin"]),
   paypalTransaction
 );
 router.get(
   "/allpaypalTransaction",
-  grantAccess(["user", "admin"]),
+  grantAccess(["merchant", "Admin"]),
   allPaypalTransaction
 );
 router.get(
   "/ebirrTransactionById",
-  grantAccess(["user", "admin"]),
+  grantAccess(["merchant", "Admin"]),
   getEbirrTransactionById
 );
 router.get(
   "/allEbirrTransactions",
-  grantAccess(["admin"]),
+  grantAccess(["Admin"]),
   getAllEbirrTransactions
 );
 
