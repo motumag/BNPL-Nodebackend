@@ -489,6 +489,7 @@ exports.initiateChapaPayment = async (req, res) => {
             amount,
             currency,
             description,
+            return_url: returnUrl,
             // orderId,
           },
           config

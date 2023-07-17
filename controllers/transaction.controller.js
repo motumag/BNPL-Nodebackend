@@ -77,7 +77,7 @@ exports.paypalTransaction = async (req, res, next) => {
     const { merchant_id } = req.query;
     const payment = await PaypalPayment.findAll({
       where: {
-        userUserId: merchant_id,
+        merchantMerchantId: merchant_id,
         status: "COMPLETED",
       },
     });
@@ -97,15 +97,14 @@ exports.allPaypalTransaction = async (req, res, next) => {
         status: "COMPLETED",
       },
       include: {
-        model: User,
-        as: "user",
+        model: Merchant,
+        as: "merchant",
         attributes: {
           exclude: [
             "password",
             "client_id",
             "secrate_key",
             "status",
-            "role",
             "createdAt",
             "updatedAt",
           ],
@@ -126,7 +125,7 @@ exports.getEbirrTransactionById = async (req, res, next) => {
     const { merchant_id } = req.query;
     const payment = await EbirrPayment.findAll({
       where: {
-        userUserId: merchant_id,
+        merchantMerchantId: merchant_id,
         paymentStatus: "Approved",
       },
       include: {
