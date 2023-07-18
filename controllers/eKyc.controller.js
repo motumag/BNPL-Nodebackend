@@ -2,12 +2,12 @@ const Ekyc = require("../models/eKyc.model");
 const Merchant = require("../usermanagement/models/merchant.model");
 const BankAccount = require("../models/bankAccount.models");
 const { approveMerchants } = require("../middlewares/adminAuth");
-
 const { v4: uuidv4 } = require("uuid");
 const Services = require("../models/service.models");
 const { where } = require("sequelize");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
-exports.createNewEkyc = async (req, res) => {
+const CustomError = require("../utils/ErrorHandler");
+exports.createNewEkyc = async (req, res, next) => {
   try {
     // console.log("The merchant_id req is: ", req.body.merchant_id);
     var {
@@ -97,7 +97,7 @@ exports.createNewEkyc = async (req, res) => {
         where: { merchant_id: merchant_id },
       });
       if (existingKyc) {
-        return res.status(409).json({ error: "Ekyc already exists" });
+        throw new CustomError("Ekyc already exists", 409);
       } else {
         const newEkyc = await Ekyc.create({
           first_name,
@@ -118,24 +118,27 @@ exports.createNewEkyc = async (req, res) => {
       }
     }
   } catch (error) {
-    console.error("Error creating business:", error);
-    res.status(500).json({ error: "Failed to create business" });
+    next(error);
   }
 };
 
 exports.getMerchantKyc = async function (req, res, next) {
   // console.log("The incomming req is: ", inc.compliance_aml);
-  const { merchant_id } = req.query;
-  const merchant_kyc = await Ekyc.findOne({
-    where: { merchant_id: merchant_id },
-  });
-  if (merchant_kyc) {
-    res.status(200).json(merchant_kyc);
-  } else {
-    res.status(400).json({ message: "Not Found" });
+  try {
+    const { merchant_id } = req.query;
+    const merchant_kyc = await Ekyc.findOne({
+      where: { merchant_id: merchant_id },
+    });
+    if (merchant_kyc) {
+      res.status(200).json(merchant_kyc);
+    } else {
+      throw new CustomError("Not Found", 404);
+    }
+  } catch (error) {
+    next(error);
   }
 };
-exports.getAllMerchantEkyc = async (request, response) => {
+exports.getAllMerchantEkyc = async (request, response, next) => {
   try {
     // const user = await getUserById(userId);
     const all_merchant = await Ekyc.findAll();
@@ -143,11 +146,10 @@ exports.getAllMerchantEkyc = async (request, response) => {
     if (all_merchant) {
       response.status(200).send(all_merchant);
     } else {
-      response.status(400).json("Merchant dont have kyc");
+      throw new CustomError("Merchant dont have kyc", 404);
     }
   } catch (error) {
-    console.error(error);
-    response.status(500).send("Internal Server Error");
+    next(error);
   }
 };
 exports.createBankAccount = async function (req, res, next) {
@@ -158,7 +160,7 @@ exports.createBankAccount = async function (req, res, next) {
       where: { account_number: account_number },
     });
     if (merchant_account_number) {
-      res.status(409).json({ message: "Account already Exists" });
+      throw new CustomError("Account already Exists", 409);
     } else {
       const account_num = await BankAccount.create({
         account_number: account_number,
@@ -173,8 +175,7 @@ exports.createBankAccount = async function (req, res, next) {
         .json({ account_num, message: "Bank Account Created Successfully " });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating" });
+    next(error);
   }
 };
 exports.setPrimaryAccount = async (req, res, next) => {
@@ -209,15 +210,15 @@ exports.setPrimaryAccount = async (req, res, next) => {
         .status(201)
         .json({ message: "Primary Account Successfully Sated" });
     } else {
-      return res.status(404).json({ message: "You Have NO Bank Account" });
+      throw new CustomError("You Have NO Bank Account", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
-exports.getMerchantAccountNumber = async function (req, res) {
-  const { merchant_id } = req.query;
+exports.getMerchantAccountNumber = async function (req, res, next) {
   try {
+    const { merchant_id } = req.query;
     const account_number = await BankAccount.findAll({
       include: {
         model: Merchant,
@@ -229,14 +230,13 @@ exports.getMerchantAccountNumber = async function (req, res) {
     if (account_number) {
       return res.status(200).json({ account_number });
     } else {
-      return res.status(400).json({ message: "Not Found" });
+      throw new CustomError("Not Found", 404);
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
-exports.approveMerchantsByAdmin = async (req, res) => {
+exports.approveMerchantsByAdmin = async (req, res, next) => {
   try {
     const { statusChange, merchantId, service_id } = req.body;
     const tokenWithPrefix = req.headers.authorization;
@@ -244,9 +244,7 @@ exports.approveMerchantsByAdmin = async (req, res) => {
     const newId = uuidv4();
     console.log("who are you?", result);
     if (result == undefined) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to approve merchants" });
+      throw new CustomError("You are not authorized to approve merchants", 403);
     }
     if (result == "Admin") {
       const merchantDetail = await Ekyc.findOne({
@@ -255,9 +253,7 @@ exports.approveMerchantsByAdmin = async (req, res) => {
       console.log(merchantDetail);
       if (merchantDetail) {
         if (merchantDetail.merchant_status == "Accepted") {
-          return res
-            .status(409)
-            .json({ message: "Merchant is already approved" });
+          throw new CustomError("Merchant is already approved", 409);
         }
         // const merchantKycStatus = merchantDetail.merchant_status;
 
@@ -276,18 +272,18 @@ exports.approveMerchantsByAdmin = async (req, res) => {
           merchant.save();
           return res.status(200).json({ message: "approved Successfully" });
         } else {
-          return res.status(500).json({ message: "Not Approved" });
+          throw new CustomError("Not Approved", 500);
         }
       } else if (merchantDetail == null) {
-        return res.status(404).json({ message: "Not Found" });
+        throw new CustomError("Not Found", 404);
       }
     } else {
-      return res
-        .status(400)
-        .json({ message: "You are not autorized to approve the merchantr" });
+      throw new CustomError(
+        "You are not autorized to approve the merchant",
+        404
+      );
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };

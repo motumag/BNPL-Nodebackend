@@ -2,7 +2,8 @@ const Merchant = require("../../BNPL-Nodebackend/usermanagement/models/merchant.
 const Otp = require("../models/otp.models");
 const axios = require("axios");
 const utils = require("../utils/utils");
-exports.getProfile = async (req, res) => {
+const CustomError = require("../utils/ErrorHandler");
+exports.getProfile = async (req, res, next) => {
   console.log("Id Is", req.query);
   console.log(req.body);
   id = req.params.id;
@@ -16,11 +17,11 @@ exports.getProfile = async (req, res) => {
       res.status(200).send({ merchant });
     }
   } catch (error) {
-    res.status(500).send({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
-exports.getUserInfo = async (req, res) => {
+exports.getUserInfo = async (req, res, next) => {
   const { phoneNumber } = req.body;
   try {
     const userInfo = axios
@@ -31,14 +32,13 @@ exports.getUserInfo = async (req, res) => {
         return res.status(200).json(response.data);
       })
       .catch((erro) => {
-        return res.status(500).send({ message: erro.message });
+        next(erro);
       });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
-exports.sendOtp = async (req, res) => {
+exports.sendOtp = async (req, res, next) => {
   const { Mobile } = req.body;
   const Text = await utils.generateRandomNumber();
   try {
@@ -52,11 +52,10 @@ exports.sendOtp = async (req, res) => {
         return res.status(200).json(response.data);
       });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
-exports.verifyOtp = async (req, res) => {
+exports.verifyOtp = async (req, res, next) => {
   const { Mobile, Text } = req.body;
   try {
     const verfiyOtp = await Otp.findOne({
@@ -64,12 +63,11 @@ exports.verifyOtp = async (req, res) => {
     });
     if (verfiyOtp) {
       verfiyOtp.destroy();
-      res.status(200).send("ok");
+      return res.status(200).send("ok");
     } else {
-      res.status(404).send("Not Found");
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };

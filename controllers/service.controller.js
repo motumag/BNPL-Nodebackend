@@ -1,5 +1,6 @@
 const Service = require("../models/service.models");
 const Merchant = require(".././usermanagement/models/merchant.model");
+const CustomError = require("../utils/ErrorHandler");
 exports.createServices = async (req, res, next) => {
   try {
     const { service_name, service_code } = req.body;
@@ -7,7 +8,7 @@ exports.createServices = async (req, res, next) => {
       where: { service_name: service_name, service_code: service_code },
     });
     if (service) {
-      return res.status(409).json({ message: "Sevice Already exists" });
+      throw new CustomError("Already Exists", 409);
     } else {
       await Service.create({
         service_name,
@@ -16,16 +17,18 @@ exports.createServices = async (req, res, next) => {
       return res.status(201).json({ message: "Service created successfully" });
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
-exports.getServices = async (req, res) => {
+exports.getServices = async (req, res, next) => {
   try {
     const services = await Service.findAll();
     if (services) {
       return res.status(200).json(services);
     } else {
-      return res.status(404).json({ message: "Service not found" });
+      throw new CustomError("not found", 404);
     }
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };

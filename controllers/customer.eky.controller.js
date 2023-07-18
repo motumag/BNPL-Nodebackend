@@ -1,7 +1,8 @@
 const CustomeEkyc = require("../models/customer_eKyc.model");
 // const Customer = require("../usermanagement/models/merchant.model");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
-exports.CreateCustomerEkyc = async (req, res) => {
+const CustomError = require("../utils/ErrorHandler");
+exports.CreateCustomerEkyc = async (req, res, next) => {
   try {
     console.log("Customer: ", req.body.salesSalesid);
     const {
@@ -38,7 +39,7 @@ exports.CreateCustomerEkyc = async (req, res) => {
       where: { national_id_number: national_id_number },
     });
     if (existingKyc) {
-      return res.status(409).json({ error: "Customer is already onboarded" });
+      throw new CustomError("Customer is already onboarded", 409);
     } else {
       const newEkyc = await CustomeEkyc.create({
         first_name,
@@ -59,24 +60,20 @@ exports.CreateCustomerEkyc = async (req, res) => {
       res.json(newEkyc);
     }
   } catch (error) {
-    console.error("Error while Adding CustomerEKYC:", error);
-    res.status(500).json({ error: "Failed to create Customerkyc" });
+    next(error);
   }
 };
-exports.getCustomerCreatedBySalesId = async (req, res) => {
+exports.getCustomerCreatedBySalesId = async (req, res, next) => {
   try {
     const customerDetail = await CustomeEkyc.findAll({
       // where: { sales_id: salesId },
     });
     if (customerDetail) {
-      res.status(200).json({ customerDetail });
+      return res.status(200).json({ customerDetail });
     } else {
-      res
-        .status(404)
-        .json({ message: "No customer is found with this salesId" });
+      throw new CustomError("No customer is found with this salesId", 404);
     }
   } catch (error) {
-    console.log("Customer fetching error: ", error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
