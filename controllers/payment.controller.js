@@ -239,11 +239,11 @@ exports.initiatePayment = async (req, res) => {
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",
         response: {
-          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + encryptedData,
+          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + btoa(encryptedData),
         },
       });
       return res.status(200).json({
-        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + encryptedData,
+        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + btoa(encryptedData),
       });
     }
   } catch (error) {
@@ -306,11 +306,11 @@ exports.initiateStripePayment = async (req, res) => {
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",
         response: {
-          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + encryptedData,
+          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + btoa(encryptedData),
         },
       });
       res.status(200).json({
-        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + encryptedData,
+        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + btoa(encryptedData),
       });
     }
   } catch (error) {
@@ -380,11 +380,11 @@ exports.initiatePaypalPayment = async (req, res) => {
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",
         response: {
-          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + encryptedData,
+          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + btoa(encryptedData),
         },
       });
       res.status(200).json({
-        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + encryptedData,
+        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + btoa(encryptedData),
       });
     }
   } catch (error) {
@@ -474,7 +474,7 @@ exports.initiateChapaPayment = async (req, res) => {
         title: title,
         callback_url: callBackUrl,
       });
-      await chapaPay.setUser(req.user);
+      await chapaPay.setMerchant(req.user);
       await chapaPay.save();
       await axiosInstance
         .post(
@@ -519,14 +519,18 @@ exports.initiateChapaPayment = async (req, res) => {
 exports.getPendingPayment = async (req, res) => {
   try {
     // const paramsObj = querystring.parse(queryParams);
-    console.log(req.query.data);
     const encryptedData = decodeURIComponent(req.query.data);
-    // console.log(encryptedData)
+    console.log("encryptedData", encryptedData);
+    // const decryptedData = CryptoJS.AES.decrypt(
+    //   encryptedData,
+    //   process.env.ENCRYPTION_KEY
+    // ).toString(CryptoJS.enc.Utf8);
     const decryptedData = CryptoJS.AES.decrypt(
-      encryptedData,
+      atob(encryptedData),
       process.env.ENCRYPTION_KEY
     ).toString(CryptoJS.enc.Utf8);
-    console.log("decrypted_data", decryptedData);
+    console.log("decryptedData", decryptedData);
+
     const stripePaymentStatus = await StripePayment.findOne({
       where: {
         endPointIdentifier: decryptedData,
@@ -701,7 +705,7 @@ exports.stripePayment = async (req, res) => {
   const { id, paymentId } = JSON.parse(req.body.data);
   const stripePaymentId = decodeURIComponent(paymentId);
   const decryptedData = CryptoJS.AES.decrypt(
-    stripePaymentId,
+    atob(stripePaymentId),
     process.env.ENCRYPTION_KEY
   ).toString(CryptoJS.enc.Utf8);
   const paymentStatus = await StripePayment.findOne({

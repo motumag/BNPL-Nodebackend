@@ -11,7 +11,8 @@ const http = require("http");
 const LoanAgreement = require("../middlewares/generateLoanAgreement");
 const Merchant = require("../usermanagement/models/merchant.model");
 const MerchantEkyc = require("../models/eKyc.model");
-exports.OrderLoanProcess = async (req, res) => {
+const CustomError = require("../utils/ErrorHandler");
+exports.OrderLoanProcess = async (req, res, next) => {
   try {
     const {
       national_id_number,
@@ -73,18 +74,19 @@ exports.OrderLoanProcess = async (req, res) => {
 
       if (hasNoneStatus) {
         console.log('There are loans with status "None".');
-        return res.status(400).json({
-          message: "Your status is None, wait until you get approved",
-        });
+        throw new CustomError(
+          "Your status is None, wait until you get approved",
+          400
+        );
       }
       if (hasUnderpaymentStatus) {
         console.log('There are loans with status "Underpaymnet".');
-        return res.status(400).json({
-          message: "Your status is Underpaymnet, Complete first your loan",
-        });
+        throw new CustomError(
+          "Your status is Underpaymnet, Complete first your loan",
+          400
+        );
       }
       if (hasCompletedStatus) {
-        console.log('There are loans with status "Completed".');
         const items = await Items.findByPk(items_loan.item_id);
         const items_loan = await ItemsLoan.findOne({
           where: { id: item_loan_id },
@@ -153,16 +155,13 @@ exports.OrderLoanProcess = async (req, res) => {
     }
     // }
     else {
-      return res.status(404).json({
-        message: "No customer is found with this NationalId",
-      });
+      throw new CustomError("Not Found", 404);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
-exports.getLoanProcess = async (req, res) => {
+exports.getLoanProcess = async (req, res, next) => {
   try {
     const { national_id_number } = req.query;
     const customerDetail = await CustomerInfo.findOne({
@@ -170,10 +169,10 @@ exports.getLoanProcess = async (req, res) => {
     });
 
     if (!customerDetail) {
-      res.status(404).json({
-        message:
-          "No user found with " + national_id_number + "National ID number",
-      });
+      throw new CustomError(
+        "No user found with " + national_id_number + "National ID number",
+        404
+      );
     } else {
       const loanProcesses = await LoanProcess.findAll({
         where: { customer_id: customerDetail.customer_id },
@@ -200,16 +199,14 @@ exports.getLoanProcess = async (req, res) => {
         });
         res.status(200).json({ loanProcesses });
       } else {
-        res
-          .status(404)
-          .json({ message: "No loan processes found forr.", loanProcesses });
+        throw new CustomError("No loan processes found forr.", 404);
       }
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
-exports.getItemsLoan = async function (req, res) {
+exports.getItemsLoan = async function (req, res, next) {
   try {
     const { id } = req.query;
     const items_loan = await ItemsLoan.findOne(
@@ -226,31 +223,30 @@ exports.getItemsLoan = async function (req, res) {
     if (items_loan) {
       res.status(200).json({ items_loan });
     } else {
-      res.status(404).json({ message: "Item not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 exports.createLoanRequest = async (req, res, next) => {
-  const {
-    sales_id,
-    item_id,
-    national_id,
-    first_name,
-    middle_name,
-    last_name,
-    phone_number,
-    interest_rate,
-    duration,
-    amount,
-    totalAmountWithInterst,
-  } = req.body;
-  const cumulative_interest = (
-    parseFloat(totalAmountWithInterst) - parseFloat(amount)
-  ).toString();
   try {
+    const {
+      sales_id,
+      item_id,
+      national_id,
+      first_name,
+      middle_name,
+      last_name,
+      phone_number,
+      interest_rate,
+      duration,
+      amount,
+      totalAmountWithInterst,
+    } = req.body;
+    const cumulative_interest = (
+      parseFloat(totalAmountWithInterst) - parseFloat(amount)
+    ).toString();
     const sales = await Sales.findByPk(sales_id);
     const items = await Items.findByPk(item_id);
     var profile_picture = "";
@@ -279,11 +275,10 @@ exports.createLoanRequest = async (req, res, next) => {
       .status(201)
       .json({ message: "Success", data: customer_loan_request });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
-exports.getLoanRequestBySalesId = async (req, res) => {
+exports.getLoanRequestBySalesId = async (req, res, next) => {
   try {
     const { sales_id } = req.query;
     const customer_loan_request = await CustLoanReq.findAll({
@@ -293,11 +288,10 @@ exports.getLoanRequestBySalesId = async (req, res) => {
     if (customer_loan_request) {
       return res.status(200).json({ customer_loan_request });
     } else {
-      return res.status(404).json({ message: "No loan request found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 exports.generateLoanAgreement = async (req, res, next) => {
@@ -331,66 +325,65 @@ exports.generateLoanAgreement = async (req, res, next) => {
           .status(200)
           .json({ message: "Success", data: loan_request.agreement_doc });
       } else {
-        return res.status(404).json({ message: "No loan request found" });
+        throw new CustomError("not found", 404);
       }
     } else {
-      return res.status(500).json({ message: "Failed" });
+      throw new CustomError("Failed", 500);
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 exports.createSalesToAdminLoanRequest = async (req, res, next) => {
-  console.log(req.body);
-  const { sales_id, merchant_id, item_id, loan_purpose, loan_req_id } =
-    req.body;
-
-  const sendLoanRequest = (postData, signed_agreement_doc) => {
-    console.log(signed_agreement_doc);
-    return new Promise((resolve, reject) => {
-      const options = {
-        hostname: process.env.LOAN_SPRING_BACKEND_HOST,
-        port: process.env.LOAN_SPRING_BACKEND_PORT, // or the appropriate port number
-        path: process.env.LOAN_SPRING_BACKEND_PATH,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
-        },
-      };
-
-      const request = http.request(options, (response) => {
-        let data = "";
-        response.on("data", (chunk) => {
-          data += chunk;
-        });
-        response.on("end", async () => {
-          console.log(response.statusCode);
-          if (response.statusCode === 201) {
-            const loanRequestStatus = await CustLoanReq.findByPk(loan_req_id);
-            if (loanRequestStatus.status === "Available") {
-              loanRequestStatus.status = "Pending";
-              loanRequestStatus.signed_agreement_doc = signed_agreement_doc;
-              await loanRequestStatus.save();
-            }
-            resolve({ statusCode: response.statusCode, message: "Success" });
-          } else {
-            reject({ statusCode: response.statusCode, message: "Error" });
-          }
-        });
-      });
-
-      request.on("error", (error) => {
-        console.error("Error", error);
-        res.status(400).json({ message: "Bad Request" });
-      });
-      console.log(postData);
-      request.write(postData);
-      request.end();
-    });
-  };
   try {
+    const { sales_id, merchant_id, item_id, loan_purpose, loan_req_id } =
+      req.body;
+
+    const sendLoanRequest = (postData, signed_agreement_doc) => {
+      console.log(signed_agreement_doc);
+      return new Promise((resolve, reject) => {
+        const options = {
+          hostname: process.env.LOAN_SPRING_BACKEND_HOST,
+          port: process.env.LOAN_SPRING_BACKEND_PORT, // or the appropriate port number
+          path: process.env.LOAN_SPRING_BACKEND_PATH,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(postData),
+          },
+        };
+
+        const request = http.request(options, (response) => {
+          let data = "";
+          response.on("data", (chunk) => {
+            data += chunk;
+          });
+          response.on("end", async () => {
+            console.log(response.statusCode);
+            if (response.statusCode === 201) {
+              const loanRequestStatus = await CustLoanReq.findByPk(loan_req_id);
+              if (loanRequestStatus.status === "Available") {
+                loanRequestStatus.status = "Pending";
+                loanRequestStatus.signed_agreement_doc = signed_agreement_doc;
+                await loanRequestStatus.save();
+              }
+              resolve({ statusCode: response.statusCode, message: "Success" });
+            } else {
+              reject({ statusCode: response.statusCode, message: "Error" });
+            }
+          });
+        });
+
+        request.on("error", (error) => {
+          console.error("Error", error);
+          res.status(400).json({ message: "Bad Request" });
+        });
+        console.log(postData);
+        request.write(postData);
+        request.end();
+      });
+    };
+
     // const sales= await Sales.findOne({where:{sales_id:sales_id}, include:{model:Merchant}})
     if (!req.file) {
       return res.status(400).json({ message: "Bad Request" });
@@ -440,7 +433,6 @@ exports.createSalesToAdminLoanRequest = async (req, res, next) => {
         .json({ message: loanResponse.message });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

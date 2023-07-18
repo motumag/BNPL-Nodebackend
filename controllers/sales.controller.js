@@ -7,7 +7,8 @@ const bcrypt = require("bcryptjs");
 const utils = require("../utils/utils");
 const SalesKyc = require("../models/salesKyc.models");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
-exports.getAllSales = async (req, res) => {
+const CustomError = require("../utils/ErrorHandler");
+exports.getAllSales = async (req, res, next) => {
   try {
     const { id } = req.query;
     const sales = await Sales.findAll({
@@ -25,10 +26,10 @@ exports.getAllSales = async (req, res) => {
     });
     return res.status(200).json(sales);
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
-exports.getSalesById = async (req, res) => {
+exports.getSalesById = async (req, res, next) => {
   try {
     const { sales_id, merchant_id } = req.query;
 
@@ -40,15 +41,15 @@ exports.getSalesById = async (req, res) => {
       attributes: ["sales_id", "email_address", "emailStatus", "phone_number"],
     });
     if (!sales) {
-      res.status(404).json({ message: "Their is no item with these Id" });
+      throw new CustomError("not found", 404);
     } else {
       return res.status(200).json(sales);
     }
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
-exports.loginSales = async (req, res) => {
+exports.loginSales = async (req, res, next) => {
   const { username, password } = req.body;
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const phoneRegex = /^\d{10}$/;
@@ -63,9 +64,9 @@ exports.loginSales = async (req, res) => {
       });
       if (sales) {
         if (sales.emailStatus == "Pending") {
-          res.status(403).json({ message: "In active Account" });
+          throw new CustomError("In active Account", 403);
         } else if (sales.emailStatus == "Inactive") {
-          res.status(403).json({ message: "Account Is InActive" });
+          throw new CustomError("Account Is InActivet", 403);
         } else {
           const passwordMatch = bcrypt.compare(password, sales.password);
           if (passwordMatch) {
@@ -81,11 +82,11 @@ exports.loginSales = async (req, res) => {
             req.session.jwt = token;
             res.status(200).send({ token: token });
           } else {
-            res.status(401).send({ message: "Invalid Credentials" });
+            throw new CustomError("Invalid Credentials", 401);
           }
         }
       } else {
-        res.status(400).send({ message: "Invalid Credentials" });
+        throw new CustomError("Invalid Credentials", 400);
       }
     } else if (isPhone) {
       const sales = await Sales.findOne({
@@ -96,9 +97,9 @@ exports.loginSales = async (req, res) => {
       console.log(sales);
       if (sales) {
         if (sales.emailStatus == "Pending") {
-          res.status(403).json({ message: "In active Account" });
+          throw new CustomError("In active Account", 403);
         } else if (sales.emailStatus == "Inactive") {
-          res.status(403).json({ message: "Account Is InActive" });
+          throw new CustomError("Account Is InActive", 403);
         } else {
           const passwordMatch = bcrypt.compare(password, sales.password);
           if (passwordMatch) {
@@ -114,17 +115,17 @@ exports.loginSales = async (req, res) => {
             req.session.jwt = token;
             res.status(200).send({ token: token });
           } else {
-            res.status(401).send({ message: "Invalid Credentials" });
+            throw new CustomError("Invalid Credentials", 401);
           }
         }
       } else {
-        res.status(401).send({ message: "Invalid Credentials" });
+        throw new CustomError("Invalid Credentials", 401);
       }
     } else {
-      res.status(422).send({ message: "Validation Error" });
+      throw new CustomError("Validation Error", 422);
     }
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 };
 exports.registerSales = async (req, res, next) => {
@@ -139,13 +140,11 @@ exports.registerSales = async (req, res, next) => {
     if (isEmail) {
       const existingMerchant = await Merchant.findByPk(merchant_id);
       if (!existingMerchant) {
-        return res
-          .status(400)
-          .json({ message: "Merchant With This Id Is Not Found" });
+        throw new CustomError("Not Found", 404);
       }
       const sales = await Sales.findOne({ where: { email_address: username } });
       if (sales) {
-        res.status(409).json({ message: "Sales Already exist" });
+        throw new CustomError("Already Exists", 409);
       } else {
         // Generate Random Password
         const password = utils.generateRandomPassword();
@@ -168,11 +167,11 @@ exports.registerSales = async (req, res, next) => {
     } else if (isPhone) {
       const existingmerchant = await Merchant.findByPk(merchant_id);
       if (!existingmerchant) {
-        return res.status(400).json({ message: "Merchant Not Found" });
+        throw new CustomError("Not Found", 404);
       }
       const sales = await Sales.findOne({ where: { phone_number: username } });
       if (sales) {
-        res.status(409).json({ message: "Sales Already exist" });
+        throw new CustomError("Already Exists", 409);
       } else {
         // Generate Random Password
         const password = utils.generateRandomPassword();
@@ -193,14 +192,13 @@ exports.registerSales = async (req, res, next) => {
         res.status(201).json({ status: "success", password });
       }
     } else {
-      res.status(500).json({ message: "Validation Error" });
+      throw new CustomError("Validation Error", 422);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Merchant registration failed" });
+    next(error);
   }
 };
-exports.sendRequestForApproval = async (req, res) => {
+exports.sendRequestForApproval = async (req, res, next) => {
   try {
     const { first_name, last_name, tin_number, sales_id } = req.body;
     const { filename, path: filePath } = req.file;

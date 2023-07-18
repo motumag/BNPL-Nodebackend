@@ -3,6 +3,7 @@ const PaypalPayment = require("../models/paypalPayment.models");
 const EbirrPayment = require("../models/ebirrPayment.models");
 const Merchant = require("../usermanagement/models/merchant.model");
 const StripePayment = require("../models/stripePayment.models");
+const CustomError = require("../utils/ErrorHandler");
 exports.transaction = async (req, res, next) => {
   try {
     const { merchant_id } = req.query;
@@ -15,16 +16,15 @@ exports.transaction = async (req, res, next) => {
     if (payment) {
       return res.status(200).json(payment);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.stripetransaction = async (req, res, next) => {
   try {
     const { merchant_id } = req.query;
-    console.log(user_id);
     const stripe = await StripePayment.findAll({
       where: {
         merchantMerchantId: merchant_id,
@@ -34,10 +34,10 @@ exports.stripetransaction = async (req, res, next) => {
     if (stripe) {
       return res.status(200).json(stripe);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.getAllTransaction = async (req, res, next) => {
@@ -50,10 +50,10 @@ exports.getAllTransaction = async (req, res, next) => {
     if (payment) {
       return res.status(200).json(payment);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.getAllStripeTransaction = async (req, res, next) => {
@@ -66,10 +66,10 @@ exports.getAllStripeTransaction = async (req, res, next) => {
     if (stripe) {
       return res.status(200).json(stripe);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.paypalTransaction = async (req, res, next) => {
@@ -84,10 +84,10 @@ exports.paypalTransaction = async (req, res, next) => {
     if (payment) {
       return res.status(200).json(payment);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.allPaypalTransaction = async (req, res, next) => {
@@ -114,10 +114,10 @@ exports.allPaypalTransaction = async (req, res, next) => {
     if (payment) {
       return res.status(200).json(payment);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.getEbirrTransactionById = async (req, res, next) => {
@@ -147,10 +147,10 @@ exports.getEbirrTransactionById = async (req, res, next) => {
     if (payment) {
       return res.status(200).json(payment);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.getAllEbirrTransactions = async (req, res, next) => {
@@ -178,9 +178,9 @@ exports.getAllEbirrTransactions = async (req, res, next) => {
     if (payment) {
       return res.status(200).json(payment);
     } else {
-      return res.status(404).json({ message: "Payment not found" });
+      throw new CustomError("not found", 404);
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };

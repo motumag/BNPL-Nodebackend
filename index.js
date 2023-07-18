@@ -42,6 +42,13 @@ app.use("/api/services", serviceRouter);
 app.use("/api/user", userRouter);
 app.use("/api", paymentRouter);
 app.use("/api/transaction", transactionRouter);
+app.use(function (err, req, res, next) {
+  // Handle Your Error Here
+  // set Status Code
+  res.status(err.statusCode || 500);
+  //send a Json Response with the error message
+  res.json({ error: err.message });
+});
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.info(`Running On Port 5000`);

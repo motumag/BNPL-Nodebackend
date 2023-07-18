@@ -5,7 +5,8 @@ const Sales = require("../usermanagement/models/sales.model");
 const ItemCategory = require("../models/itemCategory.models");
 const Merchant = require("../usermanagement/models/merchant.model");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
-exports.createNewItem = async (req, res) => {
+const CustomError = require("../utils/ErrorHandler");
+exports.createNewItem = async (req, res, next) => {
   try {
     const {
       item_name,
@@ -31,11 +32,10 @@ exports.createNewItem = async (req, res) => {
       message: "Created",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
-exports.editItemById = async (req, res) => {
+exports.editItemById = async (req, res, next) => {
   try {
     const {
       item_name,
@@ -70,14 +70,13 @@ exports.editItemById = async (req, res) => {
       await item.save();
       res.status(201).json({ item: item, message: "updated" });
     } else {
-      res.status(400).json({ message: "Item not found" });
+      throw new CustomError("Item not found", 404);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error });
+    next(error);
   }
 };
-exports.editItemUpdateById = async (req, res) => {
+exports.editItemUpdateById = async (req, res, next) => {
   try {
     const {
       item_name,
@@ -135,14 +134,13 @@ exports.editItemUpdateById = async (req, res) => {
 
       return res.status(201).json({ item: itemResponse, message: "updated" });
     } else {
-      res.status(400).json({ message: "Item not found" });
+      throw new CustomError("Item not found", 404);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error });
+    next(error);
   }
 };
-exports.getAllItems = async (req, res) => {
+exports.getAllItems = async (req, res, next) => {
   try {
     const { id } = req.query;
     const items = await Items.findAll({
@@ -168,13 +166,13 @@ exports.getAllItems = async (req, res) => {
         },
       ],
     });
-    console.log(items);
-    res.status(200).json(items);
+
+    return res.status(200).json(items);
   } catch (error) {
-    console.log("error", error);
+    next(error);
   }
 };
-exports.getAllItemsBySalesId = async (req, res) => {
+exports.getAllItemsBySalesId = async (req, res, next) => {
   try {
     const { sales_id } = req.query;
     const items = await Items.findAll({
@@ -200,12 +198,12 @@ exports.getAllItemsBySalesId = async (req, res) => {
         },
       ],
     });
-    res.status(200).json(items);
+    return res.status(200).json(items);
   } catch (error) {
-    console.log("error", error);
+    next(error);
   }
 };
-exports.getItemsById = async (req, res) => {
+exports.getItemsById = async (req, res, next) => {
   try {
     const { merchant_id, item_id } = req.query;
     const items = await Items.findOne({
@@ -215,33 +213,38 @@ exports.getItemsById = async (req, res) => {
       },
     });
     if (!items) {
-      res.status(404).json({ message: "Their is no item with these Id" });
+      throw new CustomError("Their is no item with these Id", 404);
     } else {
-      res.status(200).json(items);
+      return res.status(200).json(items);
     }
-} catch (error) {
-    
-}
-}
-exports.assignItemsToSales=async(req,res)=>{
-try {
-    const {item_id,merchant_id,sales_id}=req.body;
-    const items=await Items.findByPk(item_id, {where:{merchant_id:merchant_id,itemStatus:"Available"},include:{model:Sales, as:"sales"}});
-    const sales = await Sales.findOne({where:{sales_id:sales_id}, include:{model:Items,as:"items"}})
-    if(!items || !sales){
-        res.status(404).json({"message":"No Record Found"})
-    }else{       
-        items.itemStatus="Pending"
-        await items.addSales(sales);
-        await items.save()        
-        res.status(200).json({status:"success"})
-    }
-} catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+  } catch (error) {
+    next(error);
   }
 };
-exports.assignItemsToSalesApprove = async (req, res) => {
+exports.assignItemsToSales = async (req, res, next) => {
+  try {
+    const { item_id, merchant_id, sales_id } = req.body;
+    const items = await Items.findByPk(item_id, {
+      where: { merchant_id: merchant_id, itemStatus: "Available" },
+      include: { model: Sales, as: "sales" },
+    });
+    const sales = await Sales.findOne({
+      where: { sales_id: sales_id },
+      include: { model: Items, as: "items" },
+    });
+    if (!items || !sales) {
+      throw new CustomError("Not Found", 404);
+    } else {
+      items.itemStatus = "Pending";
+      await items.addSales(sales);
+      await items.save();
+      return res.status(200).json({ status: "success" });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+exports.assignItemsToSalesApprove = async (req, res, next) => {
   try {
     const { item_id, sales_id } = req.body;
     const items = await Items.findByPk(item_id, {
@@ -250,20 +253,19 @@ exports.assignItemsToSalesApprove = async (req, res) => {
     });
     console.log("Items", items);
     if (!items) {
-      res.status(404).json({ message: "No Item Has Been Assigned To You" });
+      throw new CustomError("Not Found", 404);
     } else {
       console.log(items);
       items.itemStatus = "Accepted";
       items.save();
-      res.status(200).json({ status: "success" });
+      return res.status(200).json({ status: "success" });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
-exports.configureLoanForitem = async (req, res) => {
+exports.configureLoanForitem = async (req, res, next) => {
   const { item_id, loan_conf_id } = req.body;
   try {
     const item = await Items.findOne({
@@ -284,13 +286,12 @@ exports.configureLoanForitem = async (req, res) => {
       await item.addLoanConfs(loanConf, {
         through: { totalAmountWithInterest: totalAmount },
       });
-      res.status(200).json(item);
+      return res.status(200).json(item);
     } else {
-      res.status(404).json({ message: "Item Not Found" });
+      throw new CustomError("Not Found", 404);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
@@ -301,15 +302,14 @@ exports.editItemStatus = async (req, res, next) => {
       where: { item_id: item_id, merchant_id: merchant_id },
     });
     if (!item) {
-      return res.status(400).json({ message: "Not Found" });
+      throw new CustomError("Not Found", 404);
     } else {
       item.status = status;
       await item.save();
       return res.status(201).json({ message: "updated" });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 exports.createItemCategory = async (req, res, next) => {
@@ -327,10 +327,9 @@ exports.createItemCategory = async (req, res, next) => {
       await item_category.setMerchant(merchant);
       return res.status(201).json({ message: "Successfully created" });
     }
-    return res.status(409).json({ message: "Item category already exists" });
+    throw new CustomError("Item category already exists", 409);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 exports.assignItemToCategory = async (req, res, next) => {
@@ -339,13 +338,12 @@ exports.assignItemToCategory = async (req, res, next) => {
     const item = await Items.findByPk(item_id);
     const item_category = await ItemCategory.findByPk(item_category_id);
     if (!item || !item_category) {
-      return res.status(400).json({ message: "Item Not Found" });
+      throw new CustomError("Not Found", 404);
     }
     await item_category.setItems(item);
     return res.status(200).json({ item_category });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
@@ -357,12 +355,11 @@ exports.getAllCategory = async (req, res, next) => {
       include: { model: Items },
     });
     if (!category) {
-      return res.status(400).json({ message: "Not Found" });
+      throw new CustomError("Not Found", 404);
     }
     return res.status(200).json({ category });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 exports.getCategoryById = async (req, res, next) => {
@@ -373,12 +370,11 @@ exports.getCategoryById = async (req, res, next) => {
       include: { model: Items },
     });
     if (!category) {
-      return res.status(400).json({ message: "Not Found" });
+      throw new CustomError("Not Found", 404);
     }
     return res.status(200).json({ category });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 exports.editCategory = async (req, res, next) => {
@@ -388,14 +384,13 @@ exports.editCategory = async (req, res, next) => {
       where: { merchant_id: merchant_id, item_category_id: item_category_id },
     });
     if (!category) {
-      return res.status(400).json({ message: "Not Found" });
+      throw new CustomError("Not Found", 404);
     }
     category.type = type;
     category.save();
     return res.status(200).json({ category });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 exports.deleteCategory = async (req, res, next) => {
@@ -405,12 +400,11 @@ exports.deleteCategory = async (req, res, next) => {
       where: { merchant_id: merchant_id, item_category_id: item_category_id },
     });
     if (!category) {
-      return res.status(400).json({ message: "Not Found" });
+      throw new CustomError("Not Found", 404);
     }
     await category.destroy();
     return res.status(200).json({ message: "deleted" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
