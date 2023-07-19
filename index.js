@@ -2,7 +2,10 @@ const express = require("express");
 const cookieSession = require("cookie-session");
 const { json } = require("body-parser");
 const bodyParser = require("body-parser");
+const helmet = require("helmet");
+const compression = require("compression");
 const cors = require("cors");
+const debug = require("debug")("app:server");
 const db = require("./configs/db");
 const merchantManagementRouter = require("./usermanagement/router/merchant");
 const itemRouter = require("./routers/item.router");
@@ -18,7 +21,10 @@ const userRouter = require("./routers/user.router");
 const paymentRouter = require("./routers/payment.router");
 const transactionRouter = require("./routers/transaction.router");
 const app = express();
+app.use(helmet());
+app.disable("x-powered-by");
 app.use(json());
+app.use(compression());
 app.use(bodyParser.json());
 // app.use(express.json());
 app.use(
@@ -42,6 +48,13 @@ app.use("/api/services", serviceRouter);
 app.use("/api/user", userRouter);
 app.use("/api", paymentRouter);
 app.use("/api/transaction", transactionRouter);
+
+
+// custom 404
+app.use((req, res, next) => {
+  res.status(404).send("Sorry can't find that Api!");
+});
+
 app.use(function (err, req, res, next) {
   // Handle Your Error Here
   // set Status Code
@@ -51,5 +64,6 @@ app.use(function (err, req, res, next) {
 });
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
+  debug(`listening on ${PORT}`);
   console.info(`Running On Port 5000`);
 });

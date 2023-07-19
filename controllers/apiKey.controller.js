@@ -6,11 +6,15 @@ const ApiKey = require("../models/apiKeys.models");
 const BankAccount = require("../models/bankAccount.models");
 const Merchant = require(".././usermanagement/models/merchant.model");
 const CustomError = require("../utils/ErrorHandler");
+const debug = require("debug")("app:server");
+
 exports.generateApiKey = async (req, res, next) => {
   try {
     let merchant = await Merchant.findOne({
       where: {
-        merchant_id: req.body.merchant_id,
+
+        merchant_id: req.merchant_id,
+
       },
       include: {
         model: BankAccount,
@@ -23,7 +27,8 @@ exports.generateApiKey = async (req, res, next) => {
     });
     if (merchant) {
       const newApiKey = await generateNewApiKey(
-        req.body.merchant_id,
+        req.merchant_id,
+
         req.body.expiryDate
       );
       if (newApiKey) {
@@ -47,8 +52,9 @@ exports.generateApiKey = async (req, res, next) => {
 
 exports.gateApiKey = async (req, res, next) => {
   try {
-    const { id } = req.query;
-    const apikey = await getGeneratedApiKey(id);
+
+    const apikey = await getGeneratedApiKey(req.merchant_id);
+
     if (apikey) {
       const client_id = apikey.client_id;
       const secrate_key = apikey.secrate_key;

@@ -125,9 +125,10 @@ exports.createNewEkyc = async (req, res, next) => {
 exports.getMerchantKyc = async function (req, res, next) {
   // console.log("The incomming req is: ", inc.compliance_aml);
   try {
-    const { merchant_id } = req.query;
+
     const merchant_kyc = await Ekyc.findOne({
-      where: { merchant_id: merchant_id },
+      where: { merchant_id: req.merchant_id },
+
     });
     if (merchant_kyc) {
       res.status(200).json(merchant_kyc);
@@ -155,7 +156,7 @@ exports.getAllMerchantEkyc = async (request, response, next) => {
 exports.createBankAccount = async function (req, res, next) {
   // console.log("The incomming req is: ", inc.compliance_aml);
   try {
-    const { merchant_id, account_number, phone_number } = req.body;
+    const { account_number, phone_number } = req.body;
     const merchant_account_number = await BankAccount.findOne({
       where: { account_number: account_number },
     });
@@ -167,7 +168,7 @@ exports.createBankAccount = async function (req, res, next) {
         phone_number: phone_number,
       });
       const merchant = await Merchant.findOne({
-        where: { merchant_id: merchant_id },
+        where: { merchant_id: req.merchant_id },
       });
       await account_num.setMerchant(merchant);
       res
@@ -180,10 +181,10 @@ exports.createBankAccount = async function (req, res, next) {
 };
 exports.setPrimaryAccount = async (req, res, next) => {
   try {
-    const { merchant_id, bank_account_id } = req.body;
+    const { bank_account_id } = req.body;
     const primary_account_number = await BankAccount.findAll({
       where: {
-        merchant_id: merchant_id,
+        merchant_id: req.merchant_id,
         // bank_account_id: bank_account_id,
         account_level: "Primary",
       },
@@ -198,7 +199,7 @@ exports.setPrimaryAccount = async (req, res, next) => {
     }
     const account_number = await BankAccount.findOne({
       where: {
-        merchant_id: merchant_id,
+        merchant_id: req.merchant_id,
         bank_account_id: bank_account_id,
         account_level: "Secondary",
       },
@@ -224,7 +225,7 @@ exports.getMerchantAccountNumber = async function (req, res, next) {
         model: Merchant,
         as: "merchant",
         attributes: ["merchant_id", "email_address"],
-        where: { merchant_id: merchant_id },
+        where: { merchant_id: req.merchant_id },
       },
     });
     if (account_number) {

@@ -6,10 +6,9 @@ const StripePayment = require("../models/stripePayment.models");
 const CustomError = require("../utils/ErrorHandler");
 exports.transaction = async (req, res, next) => {
   try {
-    const { merchant_id } = req.query;
     const payment = await CoopassPayment.findAll({
       where: {
-        merchantMerchantId: merchant_id,
+        merchantMerchantId: req.merchant_id,
         status: "COMPLETED",
       },
     });
@@ -24,10 +23,9 @@ exports.transaction = async (req, res, next) => {
 };
 exports.stripetransaction = async (req, res, next) => {
   try {
-    const { merchant_id } = req.query;
     const stripe = await StripePayment.findAll({
       where: {
-        merchantMerchantId: merchant_id,
+        merchantMerchantId: req.merchant_id,
         status: "COMPLETED",
       },
     });
@@ -74,10 +72,9 @@ exports.getAllStripeTransaction = async (req, res, next) => {
 };
 exports.paypalTransaction = async (req, res, next) => {
   try {
-    const { merchant_id } = req.query;
     const payment = await PaypalPayment.findAll({
       where: {
-        merchantMerchantId: merchant_id,
+        merchantMerchantId: req.merchant_id,
         status: "COMPLETED",
       },
     });
@@ -122,10 +119,9 @@ exports.allPaypalTransaction = async (req, res, next) => {
 };
 exports.getEbirrTransactionById = async (req, res, next) => {
   try {
-    const { merchant_id } = req.query;
     const payment = await EbirrPayment.findAll({
       where: {
-        merchantMerchantId: merchant_id,
+        merchantMerchantId: req.merchant_id,
         paymentStatus: "Approved",
       },
       include: {

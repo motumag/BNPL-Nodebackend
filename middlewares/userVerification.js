@@ -15,7 +15,14 @@ const grantAccess = (roles) => {
           res.status(403).send("Forbidde");
         } else {
           if (roles.includes(user.role)) {
-            next();
+            console.log(user.role);
+            if (user.role == "merchant") {
+              console.log("merchant_id", user.merchant_id);
+              req.merchant_id = user.merchant_id;
+              next();
+            } else {
+              next();
+            }
           } else {
             res.status(403).send("Forbidden");
           }
