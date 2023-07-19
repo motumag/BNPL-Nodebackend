@@ -49,11 +49,12 @@ app.use("/api/user", userRouter);
 app.use("/api", paymentRouter);
 app.use("/api/transaction", transactionRouter);
 
+
 // custom 404
 app.use((req, res, next) => {
   res.status(404).send("Sorry can't find that Api!");
 });
-// custome Error Handler
+
 app.use(function (err, req, res, next) {
   // Handle Your Error Here
   // set Status Code

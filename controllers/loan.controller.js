@@ -9,11 +9,13 @@ const generatePdf = require("../middlewares/generateLoanAgreement");
 const CustomError = require("../utils/ErrorHandler");
 exports.createNewLoanConfiguration = async (req, res) => {
   try {
+
     const { interest_rate, duration } = req.body;
     const loanConf = LoanConfiguration.create({
       interest_rate,
       duration,
       merchant_id: req.merchant_id,
+
     });
     res.status(201).json({ message: "Success" });
   } catch (error) {
@@ -90,6 +92,8 @@ exports.editLoanConfiguration = async (req, res, next) => {
 };
 exports.getLoanRequest = async (req, res, next) => {
   try {
+
+
     axios.get(process.env.LOAN_ADMIN_ENDPOINT).then((response) => {
       return res.status(200).json(response.data);
     });
