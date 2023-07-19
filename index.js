@@ -3,7 +3,9 @@ const cookieSession = require("cookie-session");
 const { json } = require("body-parser");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
+const compression = require("compression");
 const cors = require("cors");
+const debug = require("debug")("app:server");
 const db = require("./configs/db");
 const merchantManagementRouter = require("./usermanagement/router/merchant");
 const itemRouter = require("./routers/item.router");
@@ -22,6 +24,7 @@ const app = express();
 app.use(helmet());
 app.disable("x-powered-by");
 app.use(json());
+app.use(compression());
 app.use(bodyParser.json());
 // app.use(express.json());
 app.use(
@@ -60,5 +63,6 @@ app.use(function (err, req, res, next) {
 });
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
+  debug(`listening on ${PORT}`);
   console.info(`Running On Port 5000`);
 });

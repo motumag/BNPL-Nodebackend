@@ -11,13 +11,12 @@ const usernameVerification = require("../../middlewares/usernameVerification");
 const http = require("http");
 const { Console } = require("console");
 const { v4: uuidv4 } = require("uuid");
-
+const debug = require("debug")("app:routes");
 const {
   requestPasswordReset,
   resetPassword,
 } = require("../../middlewares/passwordReset");
 // const {getAllUser,getUserById}=require("../dal/user")
-
 exports.registerMerchant = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -76,6 +75,7 @@ exports.registerMerchant = async (req, res) => {
   }
 };
 exports.loginMerchant = async (req, res) => {
+  debug(`Received GET request for /login ${req.body}`);
   const { username, password } = req.body;
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const phoneRegex = /^\d{10}$/;
@@ -481,7 +481,7 @@ exports.getAllAccount = async (req, res, next) => {
   res.status(200).send("Set Your Bank Account Primary");
 };
 
-exports.getAllMerchants = async (request, response) => {
+exports.getAllMerchants = async (request, response,next) => {
   try {
     // const user = await getUserById(userId);
     const all_merchant = await Merchant.findAll();
@@ -497,7 +497,7 @@ exports.getAllMerchants = async (request, response) => {
   }
 };
 
-exports.getAllMerchantsByPage = async (req, res) => {
+exports.getAllMerchantsByPage = async (req, res,next) => {
   try {
     const { count, rows } = await Merchant.findAndCountAll({
       limit: perPage,

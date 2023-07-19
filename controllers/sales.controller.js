@@ -31,12 +31,12 @@ exports.getAllSales = async (req, res, next) => {
 };
 exports.getSalesById = async (req, res, next) => {
   try {
-    const { sales_id, merchant_id } = req.query;
+    const { sales_id } = req.query;
 
     const sales = await Sales.findOne({
       where: {
         sales_id: sales_id,
-        merchant_id: merchant_id,
+        merchant_id: req.merchant_id,
       },
       attributes: ["sales_id", "email_address", "emailStatus", "phone_number"],
     });
@@ -130,7 +130,7 @@ exports.loginSales = async (req, res, next) => {
 };
 exports.registerSales = async (req, res, next) => {
   try {
-    const { username, merchant_id, firstName, lastName } = req.body;
+    const { username, firstName, lastName } = req.body;
     console.log(req.body);
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const phoneRegex = /^\d{10}$/;
@@ -138,7 +138,7 @@ exports.registerSales = async (req, res, next) => {
     const isPhone = phoneRegex.test(username);
     // Check if the email is already registered for a manager
     if (isEmail) {
-      const existingMerchant = await Merchant.findByPk(merchant_id);
+      const existingMerchant = await Merchant.findByPk(req.merchant_id);
       if (!existingMerchant) {
         throw new CustomError("Not Found", 404);
       }
@@ -165,7 +165,7 @@ exports.registerSales = async (req, res, next) => {
         return res.status(201).json({ status: "success", password });
       }
     } else if (isPhone) {
-      const existingmerchant = await Merchant.findByPk(merchant_id);
+      const existingmerchant = await Merchant.findByPk(req.merchant_id);
       if (!existingmerchant) {
         throw new CustomError("Not Found", 404);
       }
@@ -232,13 +232,11 @@ exports.sendRequestForApproval = async (req, res, next) => {
 };
 exports.getAllSalesKyc = async (req, res, next) => {
   try {
-    const { merchant_id } = req.query;
-    console.log(merchant_id);
     const salesKyc = await SalesKyc.findAll({
       include: {
         model: Sales,
         as: "sales",
-        where: { merchant_id: merchant_id },
+        where: { merchant_id: req.merchant_id },
         attributes: ["email_address", "phone_number", "status"],
       },
     });
@@ -250,13 +248,13 @@ exports.getAllSalesKyc = async (req, res, next) => {
 };
 exports.approveSalesKyc = async (req, res, next) => {
   try {
-    const { sales_kyc_id, merchant_id } = req.body;
+    const { sales_kyc_id } = req.body;
     const salesKyc = await SalesKyc.findOne({
       where: { kyc_id: sales_kyc_id },
       include: {
         model: Sales,
         as: "sales",
-        where: { merchant_id: merchant_id },
+        where: { merchant_id: req.merchant_id },
       },
     });
     if (!salesKyc) {
@@ -276,13 +274,13 @@ exports.approveSalesKyc = async (req, res, next) => {
 };
 exports.rejectSalesKyc = async (req, res, next) => {
   try {
-    const { sales_kyc_id, merchant_id } = req.body;
+    const { sales_kyc_id } = req.body;
     const salesKyc = await SalesKyc.findOne({
       where: { kyc_id: sales_kyc_id },
       include: {
         model: Sales,
         as: "sales",
-        where: { merchant_id: merchant_id },
+        where: { merchant_id: req.merchant_id },
       },
     });
     if (!salesKyc) {

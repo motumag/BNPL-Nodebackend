@@ -70,7 +70,7 @@ router.put(
 router.put("/editItemStatus", grantAccess(["merchant"]), editItemStatus);
 router.post(
   "/createItemCategory",
-  // grantAccess(["merchant"]),
+  grantAccess(["merchant"]),
   createItemCategory
 );
 router.post(

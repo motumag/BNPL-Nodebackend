@@ -25,6 +25,7 @@ const serverCert = path.join(__dirname, "../", "server.cert");
 const serverKey = path.join(__dirname, "../", "server.key");
 const cert = fs.readFileSync(serverCert, "utf8");
 const key = fs.readFileSync(serverKey, "utf8");
+const CustomError = require("../utils/ErrorHandler");
 exports.payment = async (req, res, next) => {
   const accountNumber = req.body.accountNumber;
   const paymentId = req.body.paymentId;
@@ -738,63 +739,68 @@ exports.stripePayment = async (req, res) => {
     return res.status(409).send({ message: "already Payed" });
   }
 };
-exports.paypalPyment = async (req, res) => {
-  const {
-    paymentId,
-    amountValue,
-    currency_code,
-    orderId,
-    payeeMerchant_id,
-    status,
-    transactionId,
-    payeeEmail,
-    payerEmailAddress,
-    payerGiven_name,
-    payerCountry_code,
-  } = req.body;
-  const stripePaymentId = decodeURIComponent(paymentId);
-  const decryptedData = CryptoJS.AES.decrypt(
-    stripePaymentId,
-    process.env.ENCRYPTION_KEY
-  ).toString(CryptoJS.enc.Utf8);
-  const paymentStatus = await PaypalPayment.findOne({
-    where: {
-      endPointIdentifier: decryptedData,
-      status: "PENDING",
-    },
-  });
-  if (paymentStatus) {
-    paymentStatus.paypalOrderId = orderId;
-    paymentStatus.status = status;
-    paymentStatus.amount = amountValue;
-    paymentStatus.currencyCode = currency_code;
-    paymentStatus.payeeEmail = payeeEmail;
-    paymentStatus.payeeMerchant_id = payeeMerchant_id;
-    paymentStatus.transactionId = transactionId;
-    paymentStatus.payerGiven_name = payerGiven_name;
-    paymentStatus.payerEmailAddress = payerEmailAddress;
-    paymentStatus.payerCountry_code = payerCountry_code;
-    await paymentStatus.save();
-    http
-      .get(paymentStatus.callBackUrl, (resp) => {
-        let result = "";
-        resp.on("data", (chunk) => {
-          result += chunk;
+exports.paypalPyment = async (req, res, next) => {
+  try {
+    const {
+      paymentId,
+      amountValue,
+      currency_code,
+      orderId,
+      payeeMerchant_id,
+      status,
+      transactionId,
+      payeeEmail,
+      payerEmailAddress,
+      payerGiven_name,
+      payerCountry_code,
+    } = req.body;
+    const stripePaymentId = decodeURIComponent(paymentId);
+    console.log(stripePaymentId);
+    const decryptedData = CryptoJS.AES.decrypt(
+      atob(stripePaymentId),
+      process.env.ENCRYPTION_KEY
+    ).toString(CryptoJS.enc.Utf8);
+    const paymentStatus = await PaypalPayment.findOne({
+      where: {
+        endPointIdentifier: decryptedData,
+        status: "PENDING",
+      },
+    });
+    if (paymentStatus) {
+      paymentStatus.paypalOrderId = orderId;
+      paymentStatus.status = status;
+      paymentStatus.amount = amountValue;
+      paymentStatus.currencyCode = currency_code;
+      paymentStatus.payeeEmail = payeeEmail;
+      paymentStatus.payeeMerchant_id = payeeMerchant_id;
+      paymentStatus.transactionId = transactionId;
+      paymentStatus.payerGiven_name = payerGiven_name;
+      paymentStatus.payerEmailAddress = payerEmailAddress;
+      paymentStatus.payerCountry_code = payerCountry_code;
+      await paymentStatus.save();
+      http
+        .get(paymentStatus.callBackUrl, (resp) => {
+          let result = "";
+          resp.on("data", (chunk) => {
+            result += chunk;
+          });
+          resp.on("end", () => {});
+        })
+        .on("error", (error) => {
+          logger.log({
+            level: "error",
+            message: "Payment verification error",
+            error: {
+              error,
+            },
+          });
         });
-        resp.on("end", () => {});
-      })
-      .on("error", (error) => {
-        logger.log({
-          level: "error",
-          message: "Payment verification error",
-          error: {
-            error,
-          },
-        });
-      });
-    return res.status(201).json(paymentStatus);
-  } else {
-    return res.status(400).json({ message: "Not Found" });
+      return res.status(201).json(paymentStatus);
+    } else {
+      throw new CustomError("Payment Not Found", 404);
+    }
+  } catch (error) {
+    next(error);
   }
 };
 exports.verifyStripePayment = async (req, res) => {

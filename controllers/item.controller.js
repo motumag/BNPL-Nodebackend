@@ -8,21 +8,15 @@ const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 const CustomError = require("../utils/ErrorHandler");
 exports.createNewItem = async (req, res, next) => {
   try {
-    const {
-      item_name,
-      item_code,
-      item_price,
-      item_type,
-      merchant_id,
-      loan_limit,
-    } = req.body;
+    const { item_name, item_code, item_price, item_type, loan_limit } =
+      req.body;
     const { filename, path: filePath } = req.file;
     console.log(req.body, req.file);
     const item = await Items.create({
       item_code,
       item_name,
       item_price,
-      merchant_id,
+      merchant_id: req.merchant_id,
       item_pic: filename,
       item_type,
       loan_limit: loan_limit,
@@ -78,15 +72,8 @@ exports.editItemById = async (req, res, next) => {
 };
 exports.editItemUpdateById = async (req, res, next) => {
   try {
-    const {
-      item_name,
-      item_code,
-      item_price,
-      item_type,
-      merchant_id,
-      loan_limit,
-      item_id,
-    } = req.body;
+    const { item_name, item_code, item_price, item_type, loan_limit, item_id } =
+      req.body;
     const item = await Items.findOne({
       where: { item_id: item_id },
       include: { model: LoanConfig, as: "loanConfs" },
@@ -98,7 +85,7 @@ exports.editItemUpdateById = async (req, res, next) => {
       item.item_type = item_type;
       item.item_name = item_name;
       item.item_price = item_price;
-      item.merchant_id = merchant_id;
+      item.merchant_id = req.merchant_id;
       item.loan_limit = loan_limit;
       if (req.file) {
         const { filename, path: filePath } = req.file;
@@ -142,9 +129,8 @@ exports.editItemUpdateById = async (req, res, next) => {
 };
 exports.getAllItems = async (req, res, next) => {
   try {
-    const { id } = req.query;
     const items = await Items.findAll({
-      where: { merchant_id: id },
+      where: { merchant_id: req.merchant_id },
       include: [
         {
           model: Sales,
@@ -223,9 +209,9 @@ exports.getItemsById = async (req, res, next) => {
 };
 exports.assignItemsToSales = async (req, res, next) => {
   try {
-    const { item_id, merchant_id, sales_id } = req.body;
+    const { item_id, sales_id } = req.body;
     const items = await Items.findByPk(item_id, {
-      where: { merchant_id: merchant_id, itemStatus: "Available" },
+      where: { merchant_id: req.merchant_id, itemStatus: "Available" },
       include: { model: Sales, as: "sales" },
     });
     const sales = await Sales.findOne({
@@ -314,13 +300,13 @@ exports.editItemStatus = async (req, res, next) => {
 };
 exports.createItemCategory = async (req, res, next) => {
   try {
-    const { type, merchant_id } = req.body;
-    const merchant = await Merchant.findByPk(merchant_id);
+    const { type } = req.body;
+    const merchant = await Merchant.findByPk(req.merchant_id);
     if (!merchant) {
       return res.status(400).json({ message: "Merchant Not Found" });
     }
     const category = await ItemCategory.findOne({
-      where: { type: type, merchant_id: merchant_id },
+      where: { type: type, merchant_id: req.merchant_id },
     });
     if (!category) {
       const item_category = await ItemCategory.create({ type: type });
@@ -349,9 +335,8 @@ exports.assignItemToCategory = async (req, res, next) => {
 
 exports.getAllCategory = async (req, res, next) => {
   try {
-    const { merchant_id } = req.query;
     const category = await ItemCategory.findAll({
-      where: { merchant_id: merchant_id },
+      where: { merchant_id: req.merchant_id },
       include: { model: Items },
     });
     if (!category) {
@@ -395,9 +380,12 @@ exports.editCategory = async (req, res, next) => {
 };
 exports.deleteCategory = async (req, res, next) => {
   try {
-    const { merchant_id, item_category_id } = req.body;
+    const { item_category_id } = req.body;
     const category = await ItemCategory.findAll({
-      where: { merchant_id: merchant_id, item_category_id: item_category_id },
+      where: {
+        merchant_id: req.merchant_id,
+        item_category_id: item_category_id,
+      },
     });
     if (!category) {
       throw new CustomError("Not Found", 404);
