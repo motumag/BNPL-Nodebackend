@@ -29,7 +29,7 @@ exports.generatePdf = async function generateLoanAgreement(data) {
   var replacedText = templateText;
   Object.keys(data).forEach((key) => {
     const variableName = `{{${key}}}`;
-    replacedText = replacedText.replaceAll(variableName, data[key]);
+    replacedText = replacedText.replace(variableName, data[key]);
   });
   // Split the template text into lines
   const lines = replacedText.split("\n");
