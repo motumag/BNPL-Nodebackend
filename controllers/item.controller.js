@@ -22,7 +22,7 @@ exports.createNewItem = async (req, res, next) => {
       loan_limit: loan_limit,
     });
     res.status(201).json({
-      url: "http://localhost:5000/image/" + filename,
+      url: IMAGE_UPLOAD_BASE_URL + filename,
       message: "Created",
     });
   } catch (error) {
@@ -209,7 +209,6 @@ exports.getItemsById = async (req, res, next) => {
 };
 exports.assignItemsToSales = async (req, res, next) => {
   try {
-
     const { item_id, sales_id } = req.body;
     const items = await Items.findByPk(item_id, {
       where: { merchant_id: req.merchant_id, itemStatus: "Available" },

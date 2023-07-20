@@ -253,7 +253,7 @@ exports.createLoanRequest = async (req, res, next) => {
     if (req.file) {
       const { filename, path: filePath } = req.file;
       const cleaned_file_path = filePath.replace("uploads\\", "");
-      profile_picture = IMAGE_UPLOAD_BASE_URL + cleaned_file_path;
+      profile_picture = IMAGE_UPLOAD_BASE_URL + filename;
     }
     const customer_loan_request = await CustLoanReq.create({
       national_id,
