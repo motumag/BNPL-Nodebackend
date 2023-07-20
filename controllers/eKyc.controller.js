@@ -126,8 +126,10 @@ exports.createNewEkyc = async (req, res, next) => {
 exports.getMerchantKyc = async function (req, res, next) {
   // console.log("The incomming req is: ", inc.compliance_aml);
   try {
+
     const merchant_kyc = await Ekyc.findOne({
       where: { merchant_id: req.merchant_id },
+
     });
     if (merchant_kyc) {
       res.status(200).json(merchant_kyc);
@@ -218,6 +220,7 @@ exports.setPrimaryAccount = async (req, res, next) => {
 };
 exports.getMerchantAccountNumber = async function (req, res, next) {
   try {
+    const { merchant_id } = req.query;
     const account_number = await BankAccount.findAll({
       include: {
         model: Merchant,
