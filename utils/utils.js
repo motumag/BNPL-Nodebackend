@@ -194,3 +194,12 @@ exports.getToken = async function (email, password) {
     throw error;
   }
 };
+
+exports.clean_file_path = async function (filepath) {
+  const index = filepath.indexOf("uploads");
+  if (index !== -1) {
+    return filepath.slice(index + "uploads".length);
+  }
+  // If 'uploads' not found in the path, return the original path
+  return filepath;
+};

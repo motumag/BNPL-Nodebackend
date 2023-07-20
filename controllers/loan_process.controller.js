@@ -12,6 +12,7 @@ const LoanAgreement = require("../middlewares/generateLoanAgreement");
 const Merchant = require("../usermanagement/models/merchant.model");
 const MerchantEkyc = require("../models/eKyc.model");
 const CustomError = require("../utils/ErrorHandler");
+const utils = require("../utils/utils");
 exports.OrderLoanProcess = async (req, res, next) => {
   try {
     const {
@@ -314,12 +315,9 @@ exports.generateLoanAgreement = async (req, res, next) => {
         where: { loan_req_id: loan_req_id },
       });
       if (loan_request) {
-        const removedFilePath = file_path.replace(
-          "C:\\Users\\amhire\\Documents\\NodeProject\\BNPL-Nodebackend\\BNPL-Nodebackend\\uploads\\",
-          ""
-        );
-
-        loan_request.agreement_doc = IMAGE_UPLOAD_BASE_URL + removedFilePath;
+        const cleaned_path = await utils.clean_file_path(file_path);
+        console.log("cleaned_path", cleaned_path);
+        loan_request.agreement_doc = IMAGE_UPLOAD_BASE_URL + cleaned_path;
         await loan_request.save();
         return res
           .status(200)
@@ -331,7 +329,7 @@ exports.generateLoanAgreement = async (req, res, next) => {
       throw new CustomError("Failed", 500);
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     next(error);
   }
 };
