@@ -331,6 +331,7 @@ exports.generateLoanAgreement = async (req, res, next) => {
       throw new CustomError("Failed", 500);
     }
   } catch (error) {
+    console.error(error)
     next(error);
   }
 };
