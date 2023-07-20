@@ -47,16 +47,16 @@ exports.createNewEkyc = async (req, res, next) => {
       const valid_identification_path = valid_identification[0].path;
       console.log("agreement_doc_path", agreement_doc_path);
       agreament_doc_cleaned_path = agreement_doc_path.replace(
-        "uploads\\merchantKyc\\",
+        "uploads/merchantKyc/",
         ""
       );
       console.log("agreement doc cleaned path",agreament_doc_cleaned_path)
       business_license_cleaned_path = business_license_path.replace(
-        "uploads\\merchantKyc\\",
+        "uploads/merchantKyc/",
         ""
       );
       valid_identification_cleaned_path = valid_identification_path.replace(
-        "uploads\\merchantKyc\\",
+        "uploads/merchantKyc/",
         ""
       );
 
