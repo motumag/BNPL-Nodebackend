@@ -50,7 +50,7 @@ exports.createNewEkyc = async (req, res, next) => {
         "uploads/merchantKyc/",
         ""
       );
-      console.log("agreement doc cleaned path",agreament_doc_cleaned_path)
+      console.log("agreement doc cleaned path", agreament_doc_cleaned_path);
       business_license_cleaned_path = business_license_path.replace(
         "uploads/merchantKyc/",
         ""
@@ -79,15 +79,15 @@ exports.createNewEkyc = async (req, res, next) => {
           date_of_establishment,
           compliance_aml,
           agreement_doc:
-            IMAGE_UPLOAD_BASE_URL + "merchantKyc/" + agreament_doc_cleaned_path, // Store the agreement_doc file path
+            IMAGE_UPLOAD_BASE_URL + "merchantKyc/" + agreement_doc[0].filename, // Store the agreement_doc file path
           business_licnense:
             IMAGE_UPLOAD_BASE_URL +
             "merchantKyc/" +
-            business_license_cleaned_path, // Store the business_license file path
+            business_license[0].filename, // Store the business_license file path
           valid_identification:
             IMAGE_UPLOAD_BASE_URL +
             "merchantKyc/" +
-            valid_identification_cleaned_path, // Store the valid_identification file path
+            valid_identification[0].filename, // Store the valid_identification file path
 
           merchant_id: merchant_id,
         });
@@ -126,10 +126,8 @@ exports.createNewEkyc = async (req, res, next) => {
 exports.getMerchantKyc = async function (req, res, next) {
   // console.log("The incomming req is: ", inc.compliance_aml);
   try {
-
     const merchant_kyc = await Ekyc.findOne({
       where: { merchant_id: req.merchant_id },
-
     });
     if (merchant_kyc) {
       res.status(200).json(merchant_kyc);
