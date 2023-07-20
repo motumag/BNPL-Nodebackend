@@ -50,6 +50,7 @@ exports.createNewEkyc = async (req, res, next) => {
         "uploads\\merchantKyc\\",
         ""
       );
+      console.log("agreement doc cleaned path",agreament_doc_cleaned_path)
       business_license_cleaned_path = business_license_path.replace(
         "uploads\\merchantKyc\\",
         ""
