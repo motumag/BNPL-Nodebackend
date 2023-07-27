@@ -29,6 +29,7 @@ const {
   coopassPayment,
   assignPaymentServicesToMerchant,
   removePaymentServicesFromMerchant,
+  enableandDisablePaymentServices,
 } = require("../controllers/payment.controller");
 // const coopassPayment = require("../models/payment.models");
 // // User routes
@@ -85,6 +86,10 @@ router.post(
 router.post(
   "/removeMerchantFromPaymentServices",
   removePaymentServicesFromMerchant
+);
+router.post(
+  "/enableDisableMerchantPaymentServices",
+  enableandDisablePaymentServices
 );
 router.post(
   "/EbirrPayment",

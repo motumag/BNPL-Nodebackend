@@ -19,6 +19,7 @@ const PaypalPayment = require("../models/paypalPayment.models");
 const chapaPayment = require("../models/chapaPayment.models");
 const StripePayment = require("../models/stripePayment.models");
 const PaymentSevice = require("../models/paymentServices.models");
+const MerchantPaymentServices = require("../models/MerchantPaymentServices .model");
 const springCert = path.join(__dirname, "../", "Cooperative Bank.crt");
 const certificate = fs.readFileSync(springCert, "utf8");
 const serverCert = path.join(__dirname, "../", "server.cert");
@@ -1123,6 +1124,33 @@ exports.removePaymentServicesFromMerchant = async (req, res, next) => {
       if (merchantWithPaymentServices) {
         return res.status(200).json(merchantWithPaymentServices);
       }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+exports.enableandDisablePaymentServices = async (req, res, next) => {
+  try {
+    const { merchant_id, payment_service_id } = req.body;
+    // Assuming you have the `merchantId` and `paymentServiceId`
+    const merchant = await Merchant.findByPk(merchant_id);
+    const paymentService = await PaymentSevice.findByPk(payment_service_id);
+
+    // Check if the payment service is already enabled for the merchant
+    const merchantPaymentService = await MerchantPaymentServices.findOne({
+      where: {
+        merchant_id: merchant_id,
+        payment_service_id: payment_service_id,
+      },
+    });
+
+    if (merchantPaymentService && merchantPaymentService.enabled) {
+      // The payment service is enabled, so let's disable it
+      await merchantPaymentService.update({ enabled: false });
+      return res.status(200).json(merchantPaymentService);
+    } else {
+      await merchantPaymentService.update({ enabled: true });
+      return res.status(200).json(merchantPaymentService);
     }
   } catch (error) {
     next(error);
