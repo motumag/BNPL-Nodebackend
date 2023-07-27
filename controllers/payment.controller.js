@@ -28,6 +28,8 @@ const cert = fs.readFileSync(serverCert, "utf8");
 const key = fs.readFileSync(serverKey, "utf8");
 const CustomError = require("../utils/ErrorHandler");
 const Merchant = require("../usermanagement/models/merchant.model");
+const validation = require("../utils/validation");
+const sanitizeHtml = require("sanitize-html");
 exports.payment = async (req, res, next) => {
   const accountNumber = req.body.accountNumber;
   const paymentId = req.body.paymentId;
@@ -1043,16 +1045,23 @@ exports.chapa_call_back_url = async (req, res) => {
   }
 };
 exports.createPaymentServices = async (req, res, next) => {
-  const { serviceName } = req.body;
   try {
+    const { error, value } = validation.paymentServiceSchema.validate(req.body);
+    if (error) {
+      throw new CustomError("Validation Error", 400);
+    }
+    const sanitizedPaymentService = {
+      serviceName: sanitizeHtml(value.serviceName),
+    };
     const paymentServices = await PaymentSevice.findOne({
       where: {
-        payment_service_name: serviceName,
+        payment_service_name: sanitizedPaymentService.serviceName,
       },
     });
     if (paymentServices) {
       return res.status(409).json({ message: "already_exists" });
     }
+
     const service = await PaymentSevice.create({
       payment_service_name: serviceName,
     });
@@ -1060,7 +1069,7 @@ exports.createPaymentServices = async (req, res, next) => {
       return res.status(201).json({ message: "success" });
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 exports.getPaymentService = async (req, res, next) => {
@@ -1157,20 +1166,30 @@ exports.enableandDisablePaymentServices = async (req, res, next) => {
   }
 };
 exports.updatePaymentService = async (req, res, next) => {
-  const { serviceName } = req.body;
-  const paymentServices = await PaymentSevice.findOne({
-    where: {
-      payment_service_name: serviceName,
-    },
-  });
-  if (paymentServices.status === true) {
-    paymentServices.status = false;
-    paymentServices.save();
-    return res.status(201).json({ message: "updated" });
-  } else {
-    paymentServices.status = true;
-    paymentServices.save();
-    return res.status(201).json({ message: "updated" });
+  try {
+    const { error, value } = validation.paymentServiceSchema.validate(req.body);
+    if (error) {
+      throw new CustomError("Validation Error", 400);
+    }
+    const sanitizedPaymentService = {
+      serviceName: sanitizeHtml(value.serviceName),
+    };
+    const paymentServices = await PaymentSevice.findOne({
+      where: {
+        payment_service_name: sanitizedPaymentService.serviceName,
+      },
+    });
+    if (paymentServices.status === true) {
+      paymentServices.status = false;
+      paymentServices.save();
+      return res.status(201).json({ message: "updated" });
+    } else {
+      paymentServices.status = true;
+      paymentServices.save();
+      return res.status(201).json({ message: "updated" });
+    }
+  } catch (error) {
+    next(error);
   }
 };
 exports.coopassPayment = async (req, res, next) => {
