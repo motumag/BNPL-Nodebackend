@@ -76,9 +76,9 @@ router.get("/verifyPaypalPayment/:orderId", verifyPaypalPayment);
 router.get("/verifyEbirrPayment/:orderId", verifyEbirrPayment);
 router.get("/verifyStripePayment/:orderId", StripePaymentVerification);
 router.post("/verify-stripe-payment", verifyStripePayment);
-router.post("/createPaymentServices", createPaymentServices);
-router.get("/getPaymentService", getPaymentService);
-router.put("/updatePaymentService", updatePaymentService);
+router.post("/paymentService", createPaymentServices);
+router.get("/paymentService", getPaymentService);
+router.put("/paymentService", updatePaymentService);
 router.post(
   "/assignMerchantToPaymentServices",
   assignPaymentServicesToMerchant
