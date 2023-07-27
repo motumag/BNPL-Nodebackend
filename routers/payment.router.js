@@ -27,6 +27,8 @@ const {
   verifyPaypalPayment,
   verifyStripePayment,
   coopassPayment,
+  assignPaymentServicesToMerchant,
+  removePaymentServicesFromMerchant,
 } = require("../controllers/payment.controller");
 // const coopassPayment = require("../models/payment.models");
 // // User routes
@@ -76,6 +78,14 @@ router.post("/verify-stripe-payment", verifyStripePayment);
 router.post("/createPaymentServices", createPaymentServices);
 router.get("/getPaymentService", getPaymentService);
 router.put("/updatePaymentService", updatePaymentService);
+router.post(
+  "/assignMerchantToPaymentServices",
+  assignPaymentServicesToMerchant
+);
+router.post(
+  "/removeMerchantFromPaymentServices",
+  removePaymentServicesFromMerchant
+);
 router.post(
   "/EbirrPayment",
   paymentServices(["EBIRR"]),

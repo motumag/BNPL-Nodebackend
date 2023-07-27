@@ -26,6 +26,7 @@ const serverKey = path.join(__dirname, "../", "server.key");
 const cert = fs.readFileSync(serverCert, "utf8");
 const key = fs.readFileSync(serverKey, "utf8");
 const CustomError = require("../utils/ErrorHandler");
+const Merchant = require("../usermanagement/models/merchant.model");
 exports.payment = async (req, res, next) => {
   const accountNumber = req.body.accountNumber;
   const paymentId = req.body.paymentId;
@@ -1069,6 +1070,62 @@ exports.getPaymentService = async (req, res, next) => {
     }
   } catch (error) {
     return res.status(500).json({ message: "error" });
+  }
+};
+exports.assignPaymentServicesToMerchant = async (req, res, next) => {
+  try {
+    const { payment_service_id, merchant_id } = req.body;
+    const paymentServices = await PaymentSevice.findByPk(payment_service_id);
+    const merchant = await Merchant.findByPk(merchant_id);
+    if (!paymentServices && !merchant) {
+      throw new CustomError("paymentServices and merchant is Not found", 404);
+    } else if (!paymentServices) {
+      throw new CustomError("paymentServices Not found", 404);
+    } else if (!merchant) {
+      throw new CustomError("merchant Not found", 404);
+    } else {
+      await merchant.addPaymentService(paymentServices);
+      const merchantWithPaymentServices = await Merchant.findByPk(merchant_id, {
+        include: {
+          model: PaymentSevice,
+          attributes: ["payment_service_name", "status"],
+        },
+        attributes: ["merchant_id", "email_address", "phone_number"],
+      });
+      if (merchantWithPaymentServices) {
+        return res.status(200).json(merchantWithPaymentServices);
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+exports.removePaymentServicesFromMerchant = async (req, res, next) => {
+  try {
+    const { payment_service_id, merchant_id } = req.body;
+    const paymentServices = await PaymentSevice.findByPk(payment_service_id);
+    const merchant = await Merchant.findByPk(merchant_id);
+    if (!paymentServices && !merchant) {
+      throw new CustomError("paymentServices and merchant is Not found", 404);
+    } else if (!paymentServices) {
+      throw new CustomError("paymentServices Not found", 404);
+    } else if (!merchant) {
+      throw new CustomError("merchant Not found", 404);
+    } else {
+      await merchant.removePaymentService(paymentServices);
+      const merchantWithPaymentServices = await Merchant.findByPk(merchant_id, {
+        include: {
+          model: PaymentSevice,
+          attributes: ["payment_service_name", "status"],
+        },
+        attributes: ["merchant_id", "email_address", "phone_number"],
+      });
+      if (merchantWithPaymentServices) {
+        return res.status(200).json(merchantWithPaymentServices);
+      }
+    }
+  } catch (error) {
+    next(error);
   }
 };
 exports.updatePaymentService = async (req, res, next) => {

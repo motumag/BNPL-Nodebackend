@@ -13,6 +13,7 @@ const paypalPayment = require("../../models/paypalPayment.models");
 const stripePayment = require("../../models/stripePayment.models");
 const chapaPayment = require("../../models/chapaPayment.models");
 const ebirrPayment = require("../../models/ebirrPayment.models");
+const PaymentSevice = require("../../models/paymentServices.models");
 const Merchant = sequelize.define("merchants", {
   merchant_id: {
     type: DataTypes.INTEGER,
@@ -76,4 +77,12 @@ Merchant.hasMany(chapaPayment, { as: "chapaPayment" });
 chapaPayment.belongsTo(Merchant, { as: "merchant" });
 Merchant.hasMany(ebirrPayment, { as: "EbirrPayment" });
 ebirrPayment.belongsTo(Merchant, { as: "merchant" });
+Merchant.belongsToMany(PaymentSevice, {
+  through: "MerchantPaymentServices",
+  foreignKey: "merchant_id",
+});
+PaymentSevice.belongsToMany(Merchant, {
+  through: "MerchantPaymentServices",
+  foreignKey: "payment_service_id",
+});
 module.exports = Merchant;
