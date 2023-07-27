@@ -3,6 +3,7 @@ const Merchant = require(".././usermanagement/models/merchant.model");
 const PaymentService = require("../models/paymentServices.models");
 const BankAccount = require("../models/bankAccount.models");
 const ApiKey = require("../models/apiKeys.models");
+const MerchantPaymentServices = require("../models/MerchantPaymentServices .model");
 const grantAccess = (roles) => {
   return (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -34,6 +35,7 @@ const grantAccess = (roles) => {
   };
 };
 const paymentServices = (payment) => {
+  console.log("helooooooooo");
   return async (req, res, next) => {
     console.log("payment.........................", payment);
     const payment_service = await PaymentService.findOne({
@@ -43,14 +45,15 @@ const paymentServices = (payment) => {
       },
     });
     if (payment_service) {
+      req.payment_service_id = payment_service.payment_service_id;
       next();
     } else {
       return res.status(400).json({ message: "Payment service not found" });
     }
   };
 };
-
 const verifyKeys = async (req, res, next) => {
+  console.log("he;;;;;;;;;;;;;;;;;;;;;;");
   try {
     const { clientId, secrateKey, apiKey } = req.body;
     let merchant = await Merchant.findOne({
@@ -75,7 +78,20 @@ const verifyKeys = async (req, res, next) => {
         },
       ],
     });
-    if (merchant) {
+    // console.log(
+    //   "merchant_payment Services",
+    //   await merchant.getPaymentServices(),
+    //   merchant.merchant_id
+    // );
+
+    const merchant_payment_service = await MerchantPaymentServices.findOne({
+      where: {
+        merchant_id: merchant.merchant_id,
+        payment_service_id: req.payment_service_id,
+        enabled: true,
+      },
+    });
+    if (merchant && merchant_payment_service) {
       req.merchant_id = merchant.merchant_id;
       req.merchant = merchant;
       next();
@@ -86,4 +102,8 @@ const verifyKeys = async (req, res, next) => {
     return res.status(500).json({ error: error.message });
   }
 };
-module.exports = { grantAccess, verifyKeys, paymentServices };
+module.exports = {
+  grantAccess,
+  verifyKeys,
+  paymentServices,
+};

@@ -19,6 +19,7 @@ const PaypalPayment = require("../models/paypalPayment.models");
 const chapaPayment = require("../models/chapaPayment.models");
 const StripePayment = require("../models/stripePayment.models");
 const PaymentSevice = require("../models/paymentServices.models");
+const MerchantPaymentServices = require("../models/MerchantPaymentServices .model");
 const springCert = path.join(__dirname, "../", "Cooperative Bank.crt");
 const certificate = fs.readFileSync(springCert, "utf8");
 const serverCert = path.join(__dirname, "../", "server.cert");
@@ -26,6 +27,7 @@ const serverKey = path.join(__dirname, "../", "server.key");
 const cert = fs.readFileSync(serverCert, "utf8");
 const key = fs.readFileSync(serverKey, "utf8");
 const CustomError = require("../utils/ErrorHandler");
+const Merchant = require("../usermanagement/models/merchant.model");
 exports.payment = async (req, res, next) => {
   const accountNumber = req.body.accountNumber;
   const paymentId = req.body.paymentId;
@@ -1069,6 +1071,89 @@ exports.getPaymentService = async (req, res, next) => {
     }
   } catch (error) {
     return res.status(500).json({ message: "error" });
+  }
+};
+exports.assignPaymentServicesToMerchant = async (req, res, next) => {
+  try {
+    const { payment_service_id, merchant_id } = req.body;
+    const paymentServices = await PaymentSevice.findByPk(payment_service_id);
+    const merchant = await Merchant.findByPk(merchant_id);
+    if (!paymentServices && !merchant) {
+      throw new CustomError("paymentServices and merchant is Not found", 404);
+    } else if (!paymentServices) {
+      throw new CustomError("paymentServices Not found", 404);
+    } else if (!merchant) {
+      throw new CustomError("merchant Not found", 404);
+    } else {
+      await merchant.addPaymentService(paymentServices);
+      const merchantWithPaymentServices = await Merchant.findByPk(merchant_id, {
+        include: {
+          model: PaymentSevice,
+          attributes: ["payment_service_name", "status"],
+        },
+        attributes: ["merchant_id", "email_address", "phone_number"],
+      });
+      if (merchantWithPaymentServices) {
+        return res.status(200).json(merchantWithPaymentServices);
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+exports.removePaymentServicesFromMerchant = async (req, res, next) => {
+  try {
+    const { payment_service_id, merchant_id } = req.body;
+    const paymentServices = await PaymentSevice.findByPk(payment_service_id);
+    const merchant = await Merchant.findByPk(merchant_id);
+    if (!paymentServices && !merchant) {
+      throw new CustomError("paymentServices and merchant is Not found", 404);
+    } else if (!paymentServices) {
+      throw new CustomError("paymentServices Not found", 404);
+    } else if (!merchant) {
+      throw new CustomError("merchant Not found", 404);
+    } else {
+      await merchant.removePaymentService(paymentServices);
+      const merchantWithPaymentServices = await Merchant.findByPk(merchant_id, {
+        include: {
+          model: PaymentSevice,
+          attributes: ["payment_service_name", "status"],
+        },
+        attributes: ["merchant_id", "email_address", "phone_number"],
+      });
+      if (merchantWithPaymentServices) {
+        return res.status(200).json(merchantWithPaymentServices);
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+exports.enableandDisablePaymentServices = async (req, res, next) => {
+  try {
+    const { merchant_id, payment_service_id } = req.body;
+    // Assuming you have the `merchantId` and `paymentServiceId`
+    const merchant = await Merchant.findByPk(merchant_id);
+    const paymentService = await PaymentSevice.findByPk(payment_service_id);
+
+    // Check if the payment service is already enabled for the merchant
+    const merchantPaymentService = await MerchantPaymentServices.findOne({
+      where: {
+        merchant_id: merchant_id,
+        payment_service_id: payment_service_id,
+      },
+    });
+
+    if (merchantPaymentService && merchantPaymentService.enabled) {
+      // The payment service is enabled, so let's disable it
+      await merchantPaymentService.update({ enabled: false });
+      return res.status(200).json(merchantPaymentService);
+    } else {
+      await merchantPaymentService.update({ enabled: true });
+      return res.status(200).json(merchantPaymentService);
+    }
+  } catch (error) {
+    next(error);
   }
 };
 exports.updatePaymentService = async (req, res, next) => {
