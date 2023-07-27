@@ -1063,7 +1063,7 @@ exports.createPaymentServices = async (req, res, next) => {
     }
 
     const service = await PaymentSevice.create({
-      payment_service_name: serviceName,
+      payment_service_name: sanitizedPaymentService.serviceName,
     });
     if (service) {
       return res.status(201).json({ message: "success" });

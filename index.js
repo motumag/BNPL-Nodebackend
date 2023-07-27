@@ -20,6 +20,8 @@ const serviceRouter = require("./routers/service.router");
 const userRouter = require("./routers/user.router");
 const paymentRouter = require("./routers/payment.router");
 const transactionRouter = require("./routers/transaction.router");
+const logger = require("./configs/logger");
+
 const app = express();
 app.use(helmet());
 app.disable("x-powered-by");
@@ -49,7 +51,6 @@ app.use("/api/user", userRouter);
 app.use("/api", paymentRouter);
 app.use("/api/transaction", transactionRouter);
 
-
 // custom 404
 app.use((req, res, next) => {
   res.status(404).send("Sorry can't find that Api!");
@@ -65,5 +66,6 @@ app.use(function (err, req, res, next) {
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   debug(`listening on ${PORT}`);
+  logger.info(`listening on ${PORT}`);
   console.info(`Running On Port 5000`);
 });
