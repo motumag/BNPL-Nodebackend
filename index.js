@@ -69,3 +69,5 @@ app.listen(PORT, () => {
   logger.info(`listening on ${PORT}`);
   console.info(`Running On Port 5000`);
 });
+
+module.exports = app;
