@@ -7,6 +7,7 @@ const Services = require("../models/service.models");
 const { where } = require("sequelize");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 const CustomError = require("../utils/ErrorHandler");
+const PaymentSevice = require("../models/paymentServices.models");
 exports.createNewEkyc = async (req, res, next) => {
   try {
     // console.log("The merchant_id req is: ", req.body.merchant_id);
@@ -138,15 +139,21 @@ exports.getMerchantKyc = async function (req, res, next) {
     next(error);
   }
 };
-exports.getAllMerchantEkyc = async (request, response, next) => {
+exports.getAllMerchant = async (request, response, next) => {
   try {
     // const user = await getUserById(userId);
-    const all_merchant = await Ekyc.findAll();
+    const all_merchant = await Merchant.findAll({
+      attributes: ["merchant_id", "email_address", "phone_number"],
+      include: {
+        model: PaymentSevice,
+        attributes: ["payment_service_id", "payment_service_name", "status"],
+      },
+    });
 
     if (all_merchant) {
       response.status(200).send(all_merchant);
     } else {
-      throw new CustomError("Merchant dont have kyc", 404);
+      throw new CustomError("Merchant not found", 404);
     }
   } catch (error) {
     next(error);
