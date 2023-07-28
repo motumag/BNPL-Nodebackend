@@ -535,7 +535,7 @@ exports.getPendingPayment = async (req, res) => {
     //   process.env.ENCRYPTION_KEY
     // ).toString(CryptoJS.enc.Utf8);
     const decryptedData = CryptoJS.AES.decrypt(
-      atob(encryptedData),
+      Buffer.from(encryptedData, "base64").toString("utf-8"),
       process.env.ENCRYPTION_KEY
     ).toString(CryptoJS.enc.Utf8);
     console.log("decryptedData", decryptedData);
@@ -714,7 +714,7 @@ exports.stripePayment = async (req, res) => {
   const { id, paymentId } = JSON.parse(req.body.data);
   const stripePaymentId = decodeURIComponent(paymentId);
   const decryptedData = CryptoJS.AES.decrypt(
-    atob(stripePaymentId),
+    Buffer.from(stripePaymentId, "base64").toString("utf-8"),
     process.env.ENCRYPTION_KEY
   ).toString(CryptoJS.enc.Utf8);
   const paymentStatus = await StripePayment.findOne({
@@ -765,7 +765,7 @@ exports.paypalPyment = async (req, res, next) => {
     const stripePaymentId = decodeURIComponent(paymentId);
     console.log(stripePaymentId);
     const decryptedData = CryptoJS.AES.decrypt(
-      atob(stripePaymentId),
+      Buffer.from(stripePaymentId, "base64").toString("utf-8"),
       process.env.ENCRYPTION_KEY
     ).toString(CryptoJS.enc.Utf8);
     const paymentStatus = await PaypalPayment.findOne({
