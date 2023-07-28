@@ -1,23 +1,39 @@
-// app.test.js
-
+const request = require("supertest");
+const app = require("../index");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
-const app = require("./app");
-
 chai.use(chaiHttp);
-const expect = chai.expect;
+chai.should();
+describe("Payment Service Creation API", () => {
+  it("should be conflict", (done) => {
+    const newPaymentServices = {
+      serviceName: "STRIPE",
+    };
 
-describe("App", () => {
-  describe("GET /", () => {
-    it('should return "Hello, World!"', (done) => {
-      chai
-        .request(app)
-        .get("/")
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          //   expect(res.text).to.equal('Hello, World!');
-          done();
-        });
-    });
+    chai
+      .request(app)
+      .post("/api/paymentService")
+      .send(newPaymentServices)
+      .end((req, res) => {
+        res.should.have.status(409);
+        res.body.should.be.a("object");
+        done();
+      });
   });
+  it("should be bad request", (done) => {
+    const newPaymentServices = {
+      serviceName: "ASTRIPE",
+    };
+
+    chai
+      .request(app)
+      .post("/api/paymentService")
+      .send(newPaymentServices)
+      .end((req, res) => {
+        res.should.have.status(400);
+        res.body.should.be.a("object");
+        done();
+      });
+  });
+
 });
