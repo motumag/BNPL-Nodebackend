@@ -23,35 +23,19 @@ router.get(
   grantAccess(["merchant", "Admin"]),
   stripetransaction
 );
-router.get(
-  "/allstripetransaction",
-  grantAccess(["Admin"]),
-  getAllStripeTransaction
-);
-router.get(
-  "/allcoopasstransactions",
-  grantAccess(["Admin"]),
-  getAllTransaction
-);
-router.get(
-  "/paypalTransaction",
-  grantAccess(["merchant", "Admin"]),
-  paypalTransaction
-);
+router.get("/allstripetransaction", getAllStripeTransaction);
+router.get("/allcoopasstransactions", getAllTransaction);
+router.get("/paypalTransaction", grantAccess(["merchant"]), paypalTransaction);
 router.get(
   "/allpaypalTransaction",
-  grantAccess(["merchant", "Admin"]),
+  grantAccess(["merchant"]),
   allPaypalTransaction
 );
 router.get(
   "/ebirrTransactionById",
-  grantAccess(["merchant", "Admin"]),
+  grantAccess(["merchant"]),
   getEbirrTransactionById
 );
-router.get(
-  "/allEbirrTransactions",
-  grantAccess(["Admin"]),
-  getAllEbirrTransactions
-);
+router.get("/allEbirrTransactions", getAllEbirrTransactions);
 
 module.exports = router;
