@@ -10,6 +10,7 @@ const {
   getMerchantKyc,
   createBankAccount,
   getMerchantAccountNumber,
+  getAllMerchantEkyc,
   getAllMerchant,
   approveMerchantsByAdmin,
   setPrimaryAccount,
@@ -54,6 +55,7 @@ router.patch(
   setPrimaryAccount
 );
 router.get("/account", grantAccess(["merchant"]), getMerchantAccountNumber);
-router.get("/merchant", getAllMerchant);
+router.get("/merchant", getAllMerchantEkyc);
+router.get("/all-merchant", getAllMerchant);
 router.post("/approve-merchant", approveMerchantsByAdmin);
 module.exports = router;
