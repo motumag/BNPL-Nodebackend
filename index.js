@@ -23,6 +23,8 @@ const transactionRouter = require("./routers/transaction.router");
 const logger = require("./configs/logger");
 
 const app = express();
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./configs/swagger");
 app.use(helmet());
 app.disable("x-powered-by");
 app.use(json());
@@ -63,6 +65,7 @@ app.use(function (err, req, res, next) {
   //send a Json Response with the error message
   res.json({ error: err.message });
 });
+app.use("api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   debug(`listening on ${PORT}`);
