@@ -10,7 +10,7 @@ const {
   getMerchantKyc,
   createBankAccount,
   getMerchantAccountNumber,
-  getAllMerchantEkyc,
+  getAllMerchant,
   approveMerchantsByAdmin,
   setPrimaryAccount,
 } = require("../controllers/eKyc.controller");
@@ -48,8 +48,12 @@ router.get("/getKyc", grantAccess(["merchant"]), getMerchantKyc);
 router.get("/getAll", grantAccess(["merchant"]), getMerchantKyc);
 // router.get("/getAll", getAllMerchantKyc);
 router.post("/account", grantAccess(["merchant"]), createBankAccount);
-router.patch("/setPrimaryAccount", grantAccess(["merchant"]), setPrimaryAccount);
+router.patch(
+  "/setPrimaryAccount",
+  grantAccess(["merchant"]),
+  setPrimaryAccount
+);
 router.get("/account", grantAccess(["merchant"]), getMerchantAccountNumber);
-router.get("/merchant", getAllMerchantEkyc);
+router.get("/merchant", getAllMerchant);
 router.post("/approve-merchant", approveMerchantsByAdmin);
 module.exports = router;
