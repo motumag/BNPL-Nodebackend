@@ -12,7 +12,22 @@ const {
   paypalTransaction,
   stripetransaction,
 } = require("../controllers/transaction.controller");
-
+/**
+ * @swagger
+ * /coopasstransaction:
+ *   get:
+ *     summary: Get a list of transactions
+ *     description: Retrieve a list of all transaction.
+ *     responses:
+ *       '200':
+ *         description: A list of transaction.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
 router.get(
   "/coopasstransaction",
   grantAccess(["merchant", "Admin"]),

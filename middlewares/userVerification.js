@@ -56,7 +56,7 @@ const verifyKeys = async (req, res, next) => {
   console.log("he;;;;;;;;;;;;;;;;;;;;;;");
   try {
     const { clientId, secrateKey, apiKey } = req.body;
-    let merchant = await Merchant.findOne({
+    var merchant = await Merchant.findOne({
       where: {
         client_id: clientId,
         secrate_key: secrateKey,
@@ -83,18 +83,21 @@ const verifyKeys = async (req, res, next) => {
     //   await merchant.getPaymentServices(),
     //   merchant.merchant_id
     // );
-
-    const merchant_payment_service = await MerchantPaymentServices.findOne({
-      where: {
-        merchant_id: merchant.merchant_id,
-        payment_service_id: req.payment_service_id,
-        enabled: true,
-      },
-    });
-    if (merchant && merchant_payment_service) {
-      req.merchant_id = merchant.merchant_id;
-      req.merchant = merchant;
-      next();
+    if (merchant) {
+      const merchant_payment_service = await MerchantPaymentServices.findOne({
+        where: {
+          merchant_id: merchant.merchant_id,
+          payment_service_id: req.payment_service_id,
+          enabled: true,
+        },
+      });
+      if (merchant_payment_service) {
+        req.merchant_id = merchant.merchant_id;
+        req.merchant = merchant;
+        next();
+      } else {
+        return res.status(401).send("Unauthorised");
+      }
     } else {
       return res.status(401).send("Unauthorised");
     }
