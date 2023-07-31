@@ -4,10 +4,10 @@ const BankAccount = require("../models/bankAccount.models");
 const { approveMerchants } = require("../middlewares/adminAuth");
 const { v4: uuidv4 } = require("uuid");
 const Services = require("../models/service.models");
-const PaymentService = require("../models/paymentServices.models");
 const { where } = require("sequelize");
 const IMAGE_UPLOAD_BASE_URL = process.env.IMAGE_UPLOAD_BASE_URL;
 const CustomError = require("../utils/ErrorHandler");
+const PaymentService = require("../models/paymentServices.models");
 exports.createNewEkyc = async (req, res, next) => {
   try {
     // console.log("The merchant_id req is: ", req.body.merchant_id);
@@ -259,7 +259,8 @@ exports.getMerchantAccountNumber = async function (req, res, next) {
 };
 exports.approveMerchantsByAdmin = async (req, res, next) => {
   try {
-    const { statusChange, merchantId, service_id } = req.body;
+    const { statusChange, merchantId, service_id, payment_service_id } =
+      req.body;
     const tokenWithPrefix = req.headers.authorization;
     const result = approveMerchants(tokenWithPrefix);
     const newId = uuidv4();
@@ -271,13 +272,11 @@ exports.approveMerchantsByAdmin = async (req, res, next) => {
       const merchantDetail = await Ekyc.findOne({
         where: { merchant_id: merchantId },
       });
-      console.log(merchantDetail);
       if (merchantDetail) {
         if (merchantDetail.merchant_status == "Accepted") {
           throw new CustomError("Merchant is already approved", 409);
         }
         // const merchantKycStatus = merchantDetail.merchant_status;
-
         const ekycUpdate = await Ekyc.update(
           { merchant_status: statusChange }, // Provide the new status value here
           {
@@ -288,10 +287,26 @@ exports.approveMerchantsByAdmin = async (req, res, next) => {
           var merchant = await Merchant.findOne({
             where: { merchant_id: merchantId },
           });
+          var paymentService = await PaymentService.findAll({
+            where: { payment_service_id: payment_service_id },
+          });
+          var services = await Services.findByPk(service_id);
           merchant.secrate_key = newId;
           merchant.services_id = service_id;
+          if (
+            payment_service_id.length != 0 &&
+            services.service_name == "Payment Processor"
+          ) {
+            await merchant.addPaymentService(paymentService);
+          }
           merchant.save();
-          return res.status(200).json({ message: "approved Successfully" });
+          var merchant = await Merchant.findByPk(merchantId, {
+            include: { model: PaymentService },
+          });
+          return res.status(200).json({
+            message: "approved Successfully",
+            data: merchant,
+          });
         } else {
           throw new CustomError("Not Approved", 500);
         }

@@ -65,7 +65,11 @@ app.use(function (err, req, res, next) {
   //send a Json Response with the error message
   res.json({ error: err.message });
 });
-app.use("api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, { explorer: true })
+);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   debug(`listening on ${PORT}`);
