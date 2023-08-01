@@ -244,11 +244,15 @@ exports.initiatePayment = async (req, res) => {
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",
         response: {
-          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + Buffer.from(encryptedData).toString("base64"),
+          link:
+            process.env.PAYMENT_CHEACKOUT_ENDPOINT +
+            Buffer.from(encryptedData).toString("base64"),
         },
       });
       return res.status(200).json({
-        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + Buffer.from(encryptedData).toString("base64"),
+        link:
+          process.env.PAYMENT_CHEACKOUT_ENDPOINT +
+          Buffer.from(encryptedData).toString("base64"),
       });
     }
   } catch (error) {
@@ -311,11 +315,15 @@ exports.initiateStripePayment = async (req, res) => {
         level: "info",
         message: "payment initiated and Links to Actual Payment Processing",
         response: {
-          link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + Buffer.from(encryptedData).toString("base64"),
+          link:
+            process.env.PAYMENT_CHEACKOUT_ENDPOINT +
+            Buffer.from(encryptedData).toString("base64"),
         },
       });
       res.status(200).json({
-        link: process.env.PAYMENT_CHEACKOUT_ENDPOINT + Buffer.from(encryptedData).toString("base64"),
+        link:
+          process.env.PAYMENT_CHEACKOUT_ENDPOINT +
+          Buffer.from(encryptedData).toString("base64"),
       });
     }
   } catch (error) {

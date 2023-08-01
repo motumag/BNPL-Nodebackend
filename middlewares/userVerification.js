@@ -13,12 +13,10 @@ const grantAccess = (roles) => {
     if (token) {
       jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
-          res.status(403).send("Forbidde");
+          res.status(403).send("Forbidden");
         } else {
           if (roles.includes(user.role)) {
-            console.log(user.role);
             if (user.role == "merchant") {
-              console.log("merchant_id", user.merchant_id);
               req.merchant_id = user.merchant_id;
               next();
             } else {
