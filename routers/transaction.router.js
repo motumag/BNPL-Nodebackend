@@ -41,11 +41,7 @@ router.get(
 router.get("/allstripetransaction", getAllStripeTransaction);
 router.get("/allcoopasstransactions", getAllTransaction);
 router.get("/paypalTransaction", grantAccess(["merchant"]), paypalTransaction);
-router.get(
-  "/allpaypalTransaction",
-  grantAccess(["merchant"]),
-  allPaypalTransaction
-);
+router.get("/allpaypalTransaction", allPaypalTransaction);
 router.get(
   "/ebirrTransactionById",
   grantAccess(["merchant"]),
